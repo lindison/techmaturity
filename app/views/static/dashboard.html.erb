@@ -1,3 +1,10 @@
+<% if @summary.nil? %>
+	<div class="page__content" style="text-align:center; padding:60px 20px">
+		<h1>No assessment data yet</h1>
+		<p>There are no scored applications to summarize.</p>
+		<%= link_to 'Manage data', data_path, class: 'button button--cta' %>
+	</div>
+<% else %>
 <% capability_label = get_capability_labels %>
 <% scores_array = @summary.get_capability_array %>
 <% score_description = @summary.score_description_array(0) %>
@@ -111,3 +118,4 @@
 	});
 	});
 </script>
+<% end %>

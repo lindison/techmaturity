@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   get '/contact' => 'static#contact'
   post '/feedback' => 'static#send_to_slack'
 
+  # Demo data management: load sample data + PIN-gated database reset
+  get  '/data' => 'static#data', as: :data
+  post '/data/load_sample' => 'static#load_sample', as: :load_sample
+  post '/data/reset' => 'static#reset_database', as: :reset_data
+
   # Dump Endpoint
   get 'dump' => 'dump#dump'
 

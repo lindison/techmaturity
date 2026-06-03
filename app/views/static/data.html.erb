@@ -1,0 +1,28 @@
+<div class="page__content subheader">
+	<h1 class="pull-left">Manage Data</h1>
+</div>
+
+<% unless notice.nil? %>
+	<div class="alert alert-<%= notice["type"] %> alert-dismissable">
+		<a href="<%= data_path %>" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<p id="notice"><%= notice["message"] %></p>
+	</div>
+<% end %>
+
+<div class="main-content">
+	<p>There are currently <strong id="product-count"><%= @product_count %></strong> application(s) in the database.</p>
+
+	<h3>Sample data</h3>
+	<p>Load ~40 Infoblox-themed demo applications (skips any that already exist).</p>
+	<%= button_to 'Load Infoblox sample data', load_sample_path, class: 'button button--cta' %>
+
+	<hr>
+
+	<h3>Reset database</h3>
+	<p>This permanently deletes <strong>all</strong> applications, scores, and tags. Enter the reset PIN to confirm.</p>
+	<%= form_with url: reset_data_path, method: :post do %>
+		<%= password_field_tag :pin, nil, placeholder: 'Reset PIN', class: 'form-control',
+			style: 'max-width:200px; display:inline-block; margin-right:8px' %>
+		<%= submit_tag 'Reset database', class: 'button button--dngr' %>
+	<% end %>
+</div>

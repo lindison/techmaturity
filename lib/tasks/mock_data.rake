@@ -1,4 +1,10 @@
 namespace :mock_data do
+  desc "Populate the database with ~40 Infoblox-themed demo applications"
+  task infoblox: :environment do
+    created = SampleDataService.load_infoblox!
+    puts "Created #{created} Infoblox demo application(s); #{Product.unscoped.count} total."
+  end
+
   desc "Populate the database with 100 assets, scores and tags"
   task populate: :environment do
 
