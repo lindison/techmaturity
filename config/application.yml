@@ -13,11 +13,13 @@ development:
   <<: *default
 
 test:
+  # Merge defaults first, then override below (Psych gives the later value
+  # precedence, so an override must come AFTER the `<<` merge).
+  <<: *default
   enable_asset_creation: true
+  enable_tag_modification: true
   # Disabled so the onboarding modal doesn't overlay/intercept clicks in system tests.
   enable_first_time_user_exp: false
-  enable_tag_modification: true
-  <<: *default
 
 production:
   enable_asset_creation: true

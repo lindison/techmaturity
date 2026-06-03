@@ -25,4 +25,17 @@ class ProductsSearchTest < ApplicationSystemTestCase
       assert_no_text "BetaWidget"
     end
   end
+
+  test "clicking a product opens its show page instead of being trapped in the search frame" do
+    product = create(:product, name: "ClickableWidget")
+    create(:tag, product: product, key: "city", value: "anytag")
+
+    visit products_path
+    click_link "ClickableWidget"
+
+    # Must break out of the #products Turbo Frame (data-turbo-frame=_top),
+    # otherwise Turbo renders "Content missing".
+    assert_current_path product_path(product)
+    assert_no_text "Content missing"
+  end
 end

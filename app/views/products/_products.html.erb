@@ -6,7 +6,7 @@
 
     <div class="col-xs-4 col-md-2 product-tile col-centered">
       <div class= "tile-name">
-        <h3 class="text-center"><%= link_to product.name, product %></h3>
+        <h3 class="text-center"><%= link_to product.name, product, data: { turbo_frame: '_top' } %></h3>
         <small class="help-text"><p class="text-center"><%= product.product_type %></p></small>
       </div>
 
@@ -16,7 +16,7 @@
           </canvas>
         </div>
         <div class="tile-score-edit">
-          <strong><p class="text-center"><%= link_to 'Re-Evaluate Asset', new_product_score_path(product)%></p></strong>
+          <strong><p class="text-center"><%= link_to 'Re-Evaluate Asset', new_product_score_path(product), data: { turbo_frame: '_top' } %></p></strong>
         </div>
       <% else %>
         <div class="tile-score">
@@ -24,7 +24,7 @@
           </canvas>
         </div>
         <div class="tile-score-edit">
-          <strong><p class="text-center"><%= link_to 'Evaluate Asset', new_product_score_path(product)%></p></strong>
+          <strong><p class="text-center"><%= link_to 'Evaluate Asset', new_product_score_path(product), data: { turbo_frame: '_top' } %></p></strong>
         </div>
       <% end %>
 
