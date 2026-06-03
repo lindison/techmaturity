@@ -37,3 +37,4 @@ bower.json
 
 .idea
 .DS_Store
+docker-compose.override.yml

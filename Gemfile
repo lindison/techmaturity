@@ -1,9 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '5.1.6.2'
-# Use sqlite3 as the  database for Active Record
-gem 'sqlite3', '1.3.13'
+gem 'rails', '5.2.8.1'
 gem 'pg', '1.0.0'
 # Use Puma as the app server
 gem 'puma', '3.11.3'
@@ -28,7 +26,6 @@ group :development, :test do
   #     console
   gem 'byebug', platform: :mri
   gem 'factory_bot_rails'
-  gem 'minitest-rails-capybara'
   gem 'rubocop', '0.54.0', require: false
 end
 
@@ -41,8 +38,7 @@ group :development do
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', '~> 1.0.8'
-  gem 'simplecov'
+  gem 'simplecov', require: false
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
