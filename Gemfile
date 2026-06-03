@@ -1,12 +1,14 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '5.2.8.1'
+gem 'rails', '6.0.6.1'
 gem 'pg', '1.0.0'
+# TODO: remove once Ruby is bumped to 3.x (ffi >= 1.17 needs Ruby >= 3.0)
+gem 'ffi', '< 1.17'
 # Use Puma as the app server
 gem 'puma', '3.11.3'
 # Use SCSS for stylesheets
-gem 'sass-rails', '5.0.7'
+gem 'sass-rails', '~> 6.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '4.1.8'
 
@@ -17,7 +19,7 @@ gem 'turbolinks', '5.1.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '2.7.0'
 # Will Paginate gem is used for pagination of the assets index page
-gem 'will_paginate', '3.1.6'
+gem 'will_paginate', '~> 3.3'
 # Faker gem is used to generate mock data for testing
 gem 'faker', '1.8.7'
 
