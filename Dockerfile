@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     yaml-dev \
     postgresql-dev \
     nodejs \
+    git \
     # Headless Chromium for Capybara/Cuprite system tests
     chromium \
     nss \

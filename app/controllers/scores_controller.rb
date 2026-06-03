@@ -18,6 +18,7 @@ class ScoresController < ApplicationController
   def new
     build_params = @product.scores.last.nil? ? {} : @product.scores.last.attributes
     @score = @product.scores.new(build_params)
+    apply_repo_assessment(params[:repo]) if params[:repo].present?
   end
 
   # POST /scores
@@ -43,6 +44,17 @@ class ScoresController < ApplicationController
 
   def set_score
     @score = @product.scores.find(params[:id])
+  end
+
+  # Pre-fills the draft score from a repository assessment. Detected capability
+  # levels are filled in; everything else is left blank for the assessor.
+  def apply_repo_assessment(location)
+    @assessment = RepoAssessmentService.assess(location)
+    return if @assessment.error
+
+    @assessment.scores.each { |capability, level| @score[capability] = level }
+    @score.comment = "Auto-assessed from #{@assessment.source}\n" +
+                     @assessment.findings.map { |f| "#{f.title} (#{f.key.upcase}) = Level #{f.level} — #{f.note}" }.join("\n")
   end
 
   def score_params
