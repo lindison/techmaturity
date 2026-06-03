@@ -23,7 +23,7 @@ Learn more about [Tech Maturity](https://tech.ticketmaster.com/2016/11/08/gettin
 ----
 ## Try it out!
 1. [Get Docker](https://www.docker.com/get-docker)
-2. run `docker-compose up`
+2. run `docker compose up` (or `docker-compose up` on older Docker)
 3. open up `http://localhost:8080` in your web browser 🚀
 
 ----

@@ -1,6 +1,4 @@
 ---
-version: "3.8"
-
 services:
   techmaturity:
     build: .
@@ -11,6 +9,7 @@ services:
       - DB_HOST=db
       - DB_USERNAME=postgres
       - DB_PASSWORD=password
+      - DB_NAME=techmaturitydb
     depends_on: ["db"]
   db:
     image: postgres:11.7-alpine
