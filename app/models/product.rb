@@ -18,7 +18,10 @@ class Product < ApplicationRecord
 	default_scope { where(is_active: true) }
   
 	scope :search_products, -> (query='', assessed='', page_index) {
-	  queries = query.split(' ').map { |w| "%#{w.strip}%" }
+	  # Lower-case the patterns to match the lower(tags.value) column. PostgreSQL's
+	  # LIKE is case-sensitive (unlike SQLite's), so without this a mixed-case
+	  # query such as "ZebraTag" would not match a stored "zebratag".
+	  queries = query.split(' ').map { |w| "%#{w.strip.downcase}%" }
 	  where_stmt = ['lower(tags.value) LIKE ?'] * queries.size
   
 	  if assessed == '1'

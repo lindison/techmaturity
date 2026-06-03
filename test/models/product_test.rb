@@ -15,4 +15,13 @@ class ProductTest < ActiveSupport::TestCase
     Product.find p.id
   end
 
+  test "tag search is case-insensitive (PostgreSQL LIKE is case-sensitive)" do
+    product = FactoryBot.create(:product, name: "AlphaWidget")
+    FactoryBot.create(:tag, product: product, key: "city", value: "zebratag")
+
+    results = Product.search_products("ZebraTag", "", 1)
+
+    assert_includes results.map(&:id), product.id
+  end
+
 end

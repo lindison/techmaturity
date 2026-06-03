@@ -15,8 +15,10 @@ class ProductsSearchTest < ApplicationSystemTestCase
     assert_text "BetaWidget"
 
     # Typing a tag value triggers the $.ajax(dataType: 'script') live search,
-    # which re-renders #products via index.js.erb.
-    fill_in "search-tags", with: "zebratag"
+    # which re-renders #products via index.js.erb. Use a mixed-case query to
+    # guard the case-insensitive matching that PostgreSQL's LIKE doesn't give
+    # for free (the stored value is lower-case "zebratag").
+    fill_in "search-tags", with: "ZebraTag"
 
     within "#products" do
       assert_text "AlphaWidget"
