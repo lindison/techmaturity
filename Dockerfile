@@ -1,4 +1,4 @@
-FROM ruby:2.7-alpine
+FROM ruby:3.3.6-alpine
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN bundle config --global frozen 1
@@ -14,9 +14,6 @@ RUN apk add --no-cache \
     tzdata \
     yaml-dev \
     postgresql-dev \
-    sqlite-dev \
-    ruby-json \
-    yaml \
     nodejs
 
 RUN apk add --no-cache openssl ttf-dejavu && \

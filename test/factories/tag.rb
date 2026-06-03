@@ -6,7 +6,7 @@ class TagKeyHelper
               'Faker::App.author',
               'Faker::Book.publisher',
               'Faker::Book.genre',
-              'Faker::Cat.breed',
+              'Faker::Creature::Cat.breed',
               'Faker::Job.field'
               ]
 
@@ -21,7 +21,7 @@ FactoryBot.define do
   factory :tag, class: Tag do
     # this might be overly fancy :-/
     transient do
-      kindex  { Faker::Number.between(0, TagKeyHelper.tag_keys.size-1) }
+      kindex  { Faker::Number.between(from: 0, to: TagKeyHelper.tag_keys.size - 1) }
     end
 
     key { "#{TagKeyHelper.tag_keys[kindex].partition('.').last}" }

@@ -6,13 +6,13 @@ FactoryBot.define do
 
   factory :product, class: Product do
     name { Faker::Commerce.product_name }
-    product_type { product_types[Faker::Number.between(0, 2)] }
+    product_type { product_types[Faker::Number.between(from: 0, to: 2)] }
     is_assessed {false}
 
     factory :product_with_tags, class: Product do
 
       transient do
-        tag_count { Faker::Number.between(1, 10) }
+        tag_count { Faker::Number.between(from: 1, to: 10) }
       end
 
       # the after(:create) yields two values; the user instance itself and the

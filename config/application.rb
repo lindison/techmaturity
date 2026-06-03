@@ -6,7 +6,10 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-config = YAML.load(File.read(File.expand_path('../application.yml', __FILE__)))
+config = YAML.safe_load(
+  File.read(File.expand_path('../application.yml', __FILE__)),
+  aliases: true
+)
 CONFIGS = config.fetch(Rails.env, {}).symbolize_keys
 
 module Techmaturity
