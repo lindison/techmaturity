@@ -27,9 +27,23 @@ Learn more about [Tech Maturity](https://tech.ticketmaster.com/2016/11/08/gettin
 3. open up `http://localhost:8080` in your web browser 🚀
 
 ----
-## Test The Program With Bundle
-1. Run 'gem install bundle' to install bundle
-2. Run 'bundle exec rails test' to run tests
+## Running the tests
+The app targets **Ruby 3.3** and **Rails 7.2**. The simplest way to run the
+suite is inside the container (the image bundles headless Chromium for the
+system tests):
+
+```
+docker compose run --rm -e RAILS_ENV=test techmaturity \
+  sh -c "bin/rails db:prepare && bin/rails test && bin/rails test:system"
+```
+
+- `bin/rails test` runs the unit/controller tests.
+- `bin/rails test:system` runs the Capybara/Cuprite system tests (headless
+  Chromium) covering the dashboard charts and live product search.
+
+To run locally instead of in Docker you need Ruby 3.3, a Postgres instance,
+and Chromium on your PATH; then `bundle install` and the same `bin/rails`
+commands.
 
 ## Contribution
 1. Fork the project
