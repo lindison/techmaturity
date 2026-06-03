@@ -12,10 +12,11 @@ gem 'sass-rails', '~> 6.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '4.1.8'
 
-# Use jquery as the JavaScript library
-gem 'jquery-rails', '4.3.1'
-# Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
-gem 'turbolinks', '5.1.0'
+# Hotwire front-end: ESM via importmaps, Turbo for navigation, Stimulus for
+# behavior. (Replaces the inert Turbolinks and the Sprockets JS bundle.)
+gem 'importmap-rails', '~> 2.1'
+gem 'turbo-rails', '~> 2.0'
+gem 'stimulus-rails', '~> 1.3'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.11'
 # Will Paginate gem is used for pagination of the assets index page

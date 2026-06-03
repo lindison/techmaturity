@@ -59,6 +59,7 @@
 </div>
 
 <%= javascript_tag do %>
+	window.onChartReady(function() {
 
 	$(".score-main-nav-item").click(function(){
 		var elementName = $(this).data()["item"];
@@ -70,14 +71,8 @@
 
 	var color = ['#FFD69F', '#3BA3CD', '#69C943', '#4F6D7A', '#5D5D5D'];
 
-	var total_scores = document.getElementById("total-score-graph");
-	var category_scores = document.getElementById("category-score-graph");
-	var capability_scores = document.getElementById("capability-score-graph");
-
-	new Chart(total_scores, {
-		type: 'bar', 
-		scaleOverride : true,
-		scaleStartValue : 0,
+	window.renderChart("total-score-graph", {
+		type: 'bar',
 		data: {
 			labels: [
 				<% @scores.each_with_index do |score, index| %> 
@@ -100,15 +95,16 @@
 			}]
 		},
 		options:{
-			tooltips: {enabled: false},
+			plugins: { tooltip: { enabled: false } },
 			scales: {
-				yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 100 } }]
+				y: { min: 0, max: 100, beginAtZero: true }
 			}
 		}
 	});
 
 
-	new Chart(category_scores, {
+	window.renderChart("category-score-graph", {
+	    type: 'line',
 	    data: {
 	        labels: <%= raw get_category_labels %>,
 	        datasets: [
@@ -147,13 +143,14 @@
 	    },
 	    options:{
 	    	scales: {
-					yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 5, stepSize:1} }],
-					xAxes: [{ ticks : { display: true, autoSkip: false, minRotation: 90 } }]
+					y: { min: 0, max: 5, beginAtZero: true, ticks: { stepSize: 1 } },
+					x: { ticks: { display: true, autoSkip: false, minRotation: 90 } }
 			}
 	    }
 	});
 
-	new Chart(capability_scores, {
+	window.renderChart("capability-score-graph", {
+    type: 'line',
     data: {
         labels: <%= raw get_capability_labels %>,
         datasets: [
@@ -193,10 +190,11 @@
     },
     options:{
     	scales: {
-				yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 5, stepSize:1} }],
-				xAxes: [{ ticks : { display: true, autoSkip: false, minRotation: 90 } }]
+				y: { min: 0, max: 5, beginAtZero: true, ticks: { stepSize: 1 } },
+				x: { ticks: { display: true, autoSkip: false, minRotation: 90 } }
 			}
 	    }
+	});
 	});
 
 <% end %>

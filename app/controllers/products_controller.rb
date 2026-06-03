@@ -12,10 +12,8 @@ class ProductsController < ApplicationController
                 else
                   Product.list_products(params[:assessed], params[:page])
                 end
-    respond_to do |format|
-      format.html
-      format.js
-    end
+    # The live search updates the #products Turbo Frame via a plain HTML
+    # request, so there's no longer a JS (SJR) format to respond to.
   end
 
   # GET /products/1

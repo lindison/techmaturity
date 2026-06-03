@@ -11,8 +11,25 @@
 		<title>Tech Maturity</title>
 		<%= csrf_meta_tags %>
 		<%= favicon_link_tag 'rocket-fav.ico' %>
-		<%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-		<%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+		<%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
+		<%# jQuery ($ / jQuery) and Chart.js (window.Chart) as classic globals for
+		    the legacy inline view scripts and chart code. Loaded before the
+		    importmap module; intentionally not part of the ES module graph. %>
+		<%= javascript_include_tag 'jquery', 'chart.umd' %>
+		<script>
+			// Defined as a classic script so it's available to the inline chart
+			// scripts in views, which run before the deferred importmap module.
+			// Runs `draw` once the module + Turbo have loaded (turbo:load), again
+			// on each Turbo visit, and cleans up to avoid leaking listeners.
+			window.onChartReady = function(draw) {
+				document.addEventListener("turbo:load", draw);
+				document.addEventListener("turbo:before-cache", function cleanup() {
+					document.removeEventListener("turbo:load", draw);
+					document.removeEventListener("turbo:before-cache", cleanup);
+				});
+			};
+		</script>
+		<%= javascript_importmap_tags %>
 	</head>
 
 	<body class = "page edp">

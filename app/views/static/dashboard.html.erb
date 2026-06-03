@@ -78,26 +78,19 @@
 </div>
 
 <script>
-	var ctx = document.getElementById("category-average-graph");
-	var categoryAverage = new Chart(ctx, {
+	window.onChartReady(function() {
+	window.renderChart("category-average-graph", {
 		type: 'bar',
 		data: {
 			labels: <%= raw get_capability_labels %>,
-
 			datasets: [{
 				type: 'line',
 				label: 'Category',
 				data: <%= @summary.get_expanded_category_array %>,
 				borderColor: '#000000',
 				borderWidth: 1,
-				lineTension: 0,
-				pointRadius: 0,
-				options: {
-					hover: {
-						mode: 'point',
-						interact: true
-					}
-				}
+				tension: 0,
+				pointRadius: 0
 			},{
 				type: 'bar',
 				label: 'Capabilities',
@@ -111,9 +104,10 @@
 			layout: { padding: { bottom: 30 } },
 			responsive: true,
 			scales: {
-				xAxes: [{ ticks : { display: true, autoSkip: false, max: 5, minRotation: 90 } }],
-				yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 4, stepSize:1 } }]
+				x: { ticks: { display: true, autoSkip: false, minRotation: 90 } },
+				y: { min: 0, max: 4, beginAtZero: true, ticks: { stepSize: 1 } }
 			}
 		}
+	});
 	});
 </script>

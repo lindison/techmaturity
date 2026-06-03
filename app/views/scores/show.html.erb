@@ -71,13 +71,11 @@
 </div>
 
 <%= javascript_tag do %>
-
-	var ctx = document.getElementById("line-score-graph");
-
-	var lineChart = new Chart(ctx, {
-		type: 'line', 
+	window.onChartReady(function() {
+	window.renderChart("line-score-graph", {
+		type: 'line',
 		data: {
-			labels: <%= raw capability_label %>, 
+			labels: <%= raw capability_label %>,
 			datasets: [{
 				label: "Capability Scores",
 				data: <%= scores_array %>,
@@ -100,28 +98,27 @@
 				label: 'Category Score',
 				data: <%= @score.get_expanded_category_array %>,
 				borderWidth: 1,
-				lineTension: 0,
+				tension: 0,
 				pointRadius: 0
 			}]
 		},
 		options:{
 			layout: { padding: { bottom: 30 } },
 			scales: {
-				yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 4, stepSize:1} }],
-				xAxes: [{ ticks : { display: true, autoSkip: false, minRotation: 90 } }]
+				y: { min: 0, max: 4, beginAtZero: true, ticks: { stepSize: 1 } },
+				x: { ticks: { display: true, autoSkip: false, minRotation: 90 } }
 			}
 		}
 	});
 
-	ctx = document.getElementById("bar-score-graph");
-	var barChart = new Chart(ctx, {
+	window.renderChart("bar-score-graph", {
 		type: 'bar',
 		data: {
-			labels: <%= raw get_category_labels %>, 
+			labels: <%= raw get_category_labels %>,
 			datasets: [{
 				label: "Average Category Score",
 				data: <%= @score.get_category_array %>,
-				backgroundColor: ['rgba(223,243,251,0.2)', 'rgba(191, 230, 247, 0.2)', 'rgba(128,206, 239, 0.2)', 'rgba(0, 151, 211, 0.2)', 'rgba(0, 117, 167, 0.2)'], 
+				backgroundColor: ['rgba(223,243,251,0.2)', 'rgba(191, 230, 247, 0.2)', 'rgba(128,206, 239, 0.2)', 'rgba(0, 151, 211, 0.2)', 'rgba(0, 117, 167, 0.2)'],
 				borderColor: '#000000',
 				borderWidth: 1
 			},{
@@ -135,12 +132,15 @@
 			}]
 		},
 		options:{
-			title: { display: true, text: 'Category Average' },
-			legend: { display: false },
+			plugins: {
+				title: { display: true, text: 'Category Average' },
+				legend: { display: false }
+			},
 			scales: {
-				yAxes: [{ ticks:{ min: 0, beginAtZero: true, max: 4, stepSize:1 } }],
-				xAxes: [{ display: false}]
+				y: { min: 0, max: 4, beginAtZero: true, ticks: { stepSize: 1 } },
+				x: { display: false }
 			}
 		}
+	});
 	});
 <% end %>

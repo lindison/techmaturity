@@ -7,9 +7,9 @@ class DashboardTest < ApplicationSystemTestCase
 
     visit root_path
 
-    # The aggregate category chart canvas is rendered by the Chart.js view code.
-    assert_selector "canvas#category-average-graph"
-    # Reaching here with js_errors: true means jQuery + Chart.js loaded and the
-    # chart-init code ran cleanly.
+    # Assert the chart actually drew (renderChart marks the canvas on success),
+    # not merely that the canvas element exists. With js_errors: true this also
+    # proves the importmap module + Chart.js loaded and ran cleanly.
+    assert_selector "canvas#category-average-graph[data-chart-rendered='true']"
   end
 end
