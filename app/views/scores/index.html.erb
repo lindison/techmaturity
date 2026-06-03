@@ -28,7 +28,7 @@
 		</div>
 </div>
 
-<div class="score-main">
+<div class="score-main" data-controller="score-nav" data-action="click->score-nav#select">
 	<div class="score-main-nav">
 		<div class="score-main-nav-item active total-score" data-item="total-score">
 			<p> Score Trending </p>
@@ -60,14 +60,6 @@
 
 <%= javascript_tag do %>
 	window.onChartReady(function() {
-
-	$(".score-main-nav-item").click(function(){
-		var elementName = $(this).data()["item"];
-		$(".score-main-nav-item.active").removeClass("active");
-		$(".score-main-graph.active").removeClass("active");
-
-		$("."+elementName).addClass("active");
-	});
 
 	var color = ['#FFD69F', '#3BA3CD', '#69C943', '#4F6D7A', '#5D5D5D'];
 

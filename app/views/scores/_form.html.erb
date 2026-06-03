@@ -1,4 +1,4 @@
-<%= form_for([product,score]) do |f| %>
+<%= form_for([product,score], html: { id: 'score-form' }) do |f| %>
 
 	<% if score.errors.any? %>
 		<div id="error_explanation">
@@ -11,7 +11,7 @@
 		</div>
 	<% end %>
 
-	<div class="progressive-form-wrapper">
+	<div class="progressive-form-wrapper" data-controller="score-form" data-action="click->score-form#toggleSelectable">
 
 		<div class="progress">
 			<div class="progress-bar 1" style="background-color: #dff3fb"></div>
@@ -24,7 +24,7 @@
 		<div class="progressive-form 1">
 			<div class="progressive-form-header">
 				<h3 class="progressive-form-title text-center"> <strong><%= CAPABILITIES["a"] %></strong> </h3>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("1","N")'> Next </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 			<div style="clear:both; height:7px"></div>
 			<div class="progressive-form-content">
@@ -146,15 +146,15 @@
 						<td> <%= CAPABILITIES["a12_min"] %> </td>
 					</tr>
 				</table>
-					<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("1","N")'> Next </button></div>
+					<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 		</div>
 
 		<div class="progressive-form 2">
 			<div class="progressive-form-header">
-				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("2","P")'> Back </button></div>
+				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 				<h3 class="progressive-form-title text-center"> <strong><%= CAPABILITIES["b"] %></strong> </h3>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("2","N")'> Next </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 			<div style="clear:both; height:7px"></div>
 			<div class="progressive-form-content">
@@ -233,15 +233,15 @@
                     <td> <%= CAPABILITIES["b8_min"] %> </td>
                 </tr>
             </table>
-            	<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("2","P")'> Back </button></div>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("2","N")'> Next </button></div>
+            	<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 		</div>
 		<div class="progressive-form 3">
 			<div class="progressive-form-header">
-				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("3","P")'> Back </button></div>
+				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 				<h3 class="progressive-form-title text-center"> <strong><%= CAPABILITIES["c"] %></strong> </h3>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("3","N")'> Next </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 			<div style="clear:both; height:7px"></div>
 			<div class="progressive-form-content">
@@ -335,15 +335,15 @@
                     <td> <%= CAPABILITIES["c10_min"] %> </td>
                 </tr>
             </table>
-            	<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("3","P")'> Back </button></div>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("3","N")'> Next </button></div>
+            	<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 		</div>
 		<div class="progressive-form 4">
 			<div class="progressive-form-header">
-				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("4","P")'> Back </button></div>
+				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 				<h3 class="progressive-form-title text-center"> <strong><%= CAPABILITIES["d"] %></strong> </h3>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("4","N")'> Next </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 			<div style="clear:both; height:7px"></div>
 			<div class="progressive-form-content">
@@ -421,13 +421,13 @@
                     <td> <%= CAPABILITIES["d8_min"] %> </td>
                 </tr>
 			</table>
-				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("4","P")'> Back </button></div>
-				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("4","N")'> Next </button></div>
+				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
+				<div class="pull-right"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 			</div>
 		</div>
 		<div class="progressive-form 5">
 			<div class="progressive-form-header">
-				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" onclick='paginate("5","P")'> Back </button></div>
+				<div class="pull-left"> <button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 				<h3 class="progressive-form-title text-center"> <strong><%= CAPABILITIES["e"] %></strong> </h3>
 			</div>
 			<div style="clear:both; height:7px"></div>
@@ -485,47 +485,3 @@
 		</div>
 	</div>
 <% end %>
-
-<script type="text/javascript">
-
-	$(function() {
-		$(".progressive-form").hide();
-		$(".progress-bar").hide()
-		$(".1").show();
-	});
-
-	paginate = function(page_num, action){
-		$(".progressive-form").hide();
-		$(".progressive-form").scrollTop(0);
-		if (action == "P"){
-			$(".progressive-form."+(parseInt(page_num)-1).toString()).show();
-			$(".progress-bar."+page_num).hide();
-		}
-		else{
-			$(".progressive-form."+(parseInt(page_num)+1).toString()).show();
-			$(".progress-bar."+(parseInt(page_num)+1)).show();
-		}
-	}
-
-	// FIXME : revise this piece
-
-	$(document).ready(function(){
-		$(".selectable").each(function(index){
-			if ($(this).find("input[type=radio]").prop("checked")){
-				$(this).addClass("selected");
-			}
-		})
-	});
-
-	$(".selectable").click(function(){
-		cell = $(this).find("input[type=radio]");
-		cell.prop("checked", !$(cell).prop("checked"));
-		if ($(this).hasClass("selected")) {
-			$(this).removeClass("selected");
-		} else {
-			$(this).parent().find(".selectable").removeClass("selected");
-			$(this).addClass("selected");
-		}
-	});
-
-</script>

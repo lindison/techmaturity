@@ -12,10 +12,9 @@
 		<%= csrf_meta_tags %>
 		<%= favicon_link_tag 'rocket-fav.ico' %>
 		<%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
-		<%# jQuery ($ / jQuery) and Chart.js (window.Chart) as classic globals for
-		    the legacy inline view scripts and chart code. Loaded before the
-		    importmap module; intentionally not part of the ES module graph. %>
-		<%= javascript_include_tag 'jquery', 'chart.umd' %>
+		<%# Chart.js (window.Chart) as a classic global for the inline chart view
+		    scripts. Loaded before the importmap module; not part of the ES graph. %>
+		<%= javascript_include_tag 'chart.umd' %>
 		<script>
 			// Defined as a classic script so it's available to the inline chart
 			// scripts in views, which run before the deferred importmap module.
@@ -120,20 +119,26 @@
 
 		</div>
 		<script type="text/javascript">
+			// Plain DOM helpers invoked from inline onclick attributes in the views.
 			function openSlider(className) {
-				$(".slider-title").html($("."+className).find(".title").html());
-				$(".slider-content").html($("."+className).find(".content").html());
-				$(".slider-wrapper").show();
+				document.querySelector(".slider-title").innerHTML =
+					document.querySelector("." + className + " .title").innerHTML;
+				document.querySelector(".slider-content").innerHTML =
+					document.querySelector("." + className + " .content").innerHTML;
+				document.querySelector(".slider-wrapper").style.display = "block";
 			}
 			function closeSlider() {
-				$(".slider-wrapper").hide();
+				document.querySelector(".slider-wrapper").style.display = "none";
 			}
 			function video() {
-				$(".message-paginate.active").removeClass("active");
-				$(".message-paginate.video-page").addClass("active");
+				document.querySelectorAll(".message-paginate.active")
+					.forEach(function (el) { el.classList.remove("active"); });
+				var page = document.querySelector(".message-paginate.video-page");
+				if (page) page.classList.add("active");
 			}
-			function closeModal(){
-				$(".first-time-page-wrapper").remove();
+			function closeModal() {
+				var modal = document.querySelector(".first-time-page-wrapper");
+				if (modal) modal.remove();
 			}
 		</script>
 	</body>
