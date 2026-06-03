@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '6.0.6.1'
-gem 'pg', '1.0.0'
+gem 'rails', '6.1.7.10'
+gem 'pg', '~> 1.5.0'
 # TODO: remove once Ruby is bumped to 3.x (ffi >= 1.17 needs Ruby >= 3.0)
 gem 'ffi', '< 1.17'
 # Use Puma as the app server
