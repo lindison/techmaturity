@@ -14,7 +14,8 @@ development:
 
 test:
   enable_asset_creation: true
-  enable_first_time_user_exp: true
+  # Disabled so the onboarding modal doesn't overlay/intercept clicks in system tests.
+  enable_first_time_user_exp: false
   enable_tag_modification: true
   <<: *default
 

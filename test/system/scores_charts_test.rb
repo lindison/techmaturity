@@ -25,4 +25,16 @@ class ScoresChartsTest < ApplicationSystemTestCase
     assert_selector "canvas#line-score-graph[data-chart-rendered='true']"
     assert_selector "canvas#bar-score-graph[data-chart-rendered='true']"
   end
+
+  test "scores index nav switches the active chart tab" do
+    visit product_scores_path(@product)
+    page.execute_script("document.querySelector('.first-time-page-wrapper')?.remove()")
+
+    assert_selector ".score-main-graph.total-score.active"
+
+    find(".score-main-nav-item.category-score").click
+
+    assert_selector ".score-main-graph.category-score.active"
+    assert_no_selector ".score-main-graph.total-score.active"
+  end
 end
