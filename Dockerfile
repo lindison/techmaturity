@@ -14,7 +14,13 @@ RUN apk add --no-cache \
     tzdata \
     yaml-dev \
     postgresql-dev \
-    nodejs
+    nodejs \
+    # Headless Chromium for Capybara/Cuprite system tests
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont
 
 RUN apk add --no-cache openssl ttf-dejavu && \
     wget -O /usr/local/bin/dumb-init "https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_x86_64" && \

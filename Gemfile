@@ -43,6 +43,10 @@ group :test do
   # Rails 6.1's test runner is incompatible with minitest 6's `run` signature.
   gem 'minitest', '~> 5.25'
   gem 'simplecov', require: false
+  # System tests: drive a real headless Chromium (Capybara + Cuprite/CDP) so
+  # the JS-heavy dashboard charts and live search are covered.
+  gem 'capybara', '~> 3.40'
+  gem 'cuprite', '~> 0.15'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
