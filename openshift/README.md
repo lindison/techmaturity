@@ -1,4 +1,4 @@
-### Deploy Tech maturity by Ticketmaster on OpenShift
+### Deploy Tech Maturity on OpenShift
 
 Two different templates are provided, `ephemeral` with no data persistence, and `persistent` with data persistence backed by PostgreSQL.
 
@@ -6,7 +6,7 @@ To instantiate the template, run the following.
 
 1. Create a project in which to host your application.
 	```
-	oc new-project <project> --display-name="Tech maturity by Ticketmaster" --description="Tech maturity by Ticketmaster."
+	oc new-project <project> --display-name="Tech Maturity" --description="Tech Maturity."
 	```
 
 2. Ephemeral deployment: instantiate the `ephemeral` template

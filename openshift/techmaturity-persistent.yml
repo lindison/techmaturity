@@ -20,11 +20,11 @@ objects:
     - name: "${APP_VERSION}"
       from:
         kind: DockerImage
-        name: docker.io/ticketmaster/techmaturity:${APP_VERSION}
+        name: docker.io/lindison/techmaturity:${APP_VERSION}
       importPolicy: {}
       annotations:
-        description: Tech maturity by Ticketmaster
-        tags: ticketmaster,techmaturity
+        description: Tech Maturity
+        tags: techmaturity
         version: "${APP_VERSION}"
 - apiVersion: v1
   kind: Secret

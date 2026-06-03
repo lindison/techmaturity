@@ -10,8 +10,8 @@ Rails.application.routes.draw do
   # Dump Endpoint
   get 'dump' => 'dump#dump'
 
-  # External Endpoints 
-  get '/github', to: redirect('https://github.com/Ticketmaster/techmaturity.git')
+  # External Endpoints
+  get '/github', to: redirect('https://github.com/lindison/techmaturity')
 
   # Restful resources
   resources :products do
