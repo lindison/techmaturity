@@ -18,7 +18,10 @@ class StaticController < ApplicationController
     @org_readiness = Assessment.org_readiness(@framework)
   end
 
-  def docs; end
+  def docs
+    @frameworks = Framework.ordered
+    @framework = Framework.find_by(slug: params[:framework]) || Framework.default
+  end
 
   def about; end
 

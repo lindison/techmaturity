@@ -23,7 +23,7 @@ class DataManagementTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to data_path
     assert_equal 0, Product.unscoped.count
-    assert_equal 0, Score.count
+    assert_equal 0, Assessment.count
     assert_equal 0, Tag.count
   end
 

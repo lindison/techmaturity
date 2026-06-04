@@ -1,6 +1,5 @@
 class Product < ApplicationRecord
 	has_many :tags, :dependent => :destroy
-	has_many :scores, :dependent => :destroy
 	has_many :assessments, :dependent => :destroy
 	belongs_to :framework, optional: true
 
@@ -8,49 +7,45 @@ class Product < ApplicationRecord
 	def framework_or_default
 	  framework || Framework.default
 	end
-  
+
 	validates :name, presence: true
 	validates :product_type, presence: true
-  
+
 	self.per_page = 10
-  
+
 	def assess
 	  self.update_columns(:is_assessed => true)
 	end
-  
-	def latest_score
-	  self.scores.last
-	end
-  
+
 	default_scope { where(is_active: true) }
-  
+
 	scope :search_products, -> (query='', assessed='', page_index) {
 	  # Lower-case the patterns to match the lower(tags.value) column. PostgreSQL's
 	  # LIKE is case-sensitive (unlike SQLite's), so without this a mixed-case
 	  # query such as "ZebraTag" would not match a stored "zebratag".
 	  queries = query.split(' ').map { |w| "%#{w.strip.downcase}%" }
 	  where_stmt = ['lower(tags.value) LIKE ?'] * queries.size
-  
+
 	  if assessed == '1'
-		includes(:tags, :scores).joins(:tags).group("products.id, scores.id, tags.id")
+		includes(:tags).joins(:tags).group("products.id, tags.id")
 		  .where( where_stmt.join(' OR ') +' AND products.is_assessed = ? ', *queries, true)
 		  .paginate(page: page_index)
 	  else
-		includes(:tags, :scores).joins(:tags).group("products.id, scores.id, tags.id")
+		includes(:tags).joins(:tags).group("products.id, tags.id")
 		  .where( where_stmt.join(' OR '), *queries)
 		  .paginate(page: page_index)
 	  end
 	}
-  
+
 	scope :list_products, -> (assessed='', page_index) {
 	  if assessed == '1'
-		includes(:tags, :scores)
+		includes(:tags, :assessments)
 		  .where(is_assessed: true)
 		  .paginate(page: page_index)
 	  else
-		includes(:tags, :scores)
+		includes(:tags, :assessments)
 		  .paginate(page: page_index)
 	  end
 	}
-	  
+
   end
