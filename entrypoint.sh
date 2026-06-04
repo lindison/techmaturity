@@ -10,7 +10,10 @@ export DISABLE_SPRING=1
 # `rails secret` replaces the `rake secret` task that was removed in Rails 7.2.
 export SECRET_KEY_BASE="${SECRET_KEY_BASE:-$(bin/rails secret)}"
 
-# Create (if needed), migrate, and seed the database.
+# Create (if needed) and migrate the database, then (idempotently) seed the
+# maturity framework definitions so they exist on every deploy, not just on a
+# freshly created database.
 bin/rails db:prepare
+bin/rails db:seed
 
 exec bin/rails server -b 0.0.0.0 -p 3000
