@@ -19,31 +19,48 @@ class RepoAssessmentService
   Finding = Struct.new(:key, :title, :level, :note, keyword_init: true)
   Result  = Struct.new(:source, :scores, :findings, :error, keyword_init: true)
 
-  CAPABILITY_TITLES = {
-    "a3"  => "Test Suite",
-    "a4"  => "Logging and Telemetry",
-    "a12" => "Behavior Driven Development (BDD)",
-    "b2"  => "Code Quality",
-    "b3"  => "Security Code Analysis",
-    "b4"  => "Automated Testing",
-    "b5"  => "Continuous Integration",
-    "c1"  => "Deployment Strategy",
-    "c2"  => "Release Frequency",
-    "c3"  => "Feature Flags",
-    "c7"  => "Deployment Methodology",
-    "c8"  => "Dependency Management",
-    "c10" => "Scriptable DB Releases",
-    "d2"  => "Runbook Adoption"
+  # Per-framework detector sets: [capability slug, title, detector method].
+  DETECTORS = {
+    "tech" => [
+      ["a3",  "Test Suite",                        :detect_a3],
+      ["a4",  "Logging and Telemetry",             :detect_a4],
+      ["a12", "Behavior Driven Development (BDD)",  :detect_a12],
+      ["b2",  "Code Quality",                       :detect_b2],
+      ["b3",  "Security Code Analysis",             :detect_b3],
+      ["b4",  "Automated Testing",                  :detect_b4],
+      ["b5",  "Continuous Integration",             :detect_b5],
+      ["c1",  "Deployment Strategy",                :detect_c1],
+      ["c2",  "Release Frequency",                  :detect_c2],
+      ["c3",  "Feature Flags",                      :detect_c3],
+      ["c7",  "Deployment Methodology",             :detect_c7],
+      ["c8",  "Dependency Management",              :detect_c8],
+      ["c10", "Scriptable DB Releases",             :detect_c10],
+      ["d2",  "Runbook Adoption",                   :detect_d2]
+    ],
+    "sre" => [
+      ["slo",                 "Service Level Objectives",  :detect_slo],
+      ["golden_signals",      "Four Golden Signals",       :detect_metrics],
+      ["dashboards",          "Dashboards",                :detect_dashboards],
+      ["alerting",            "Symptom-based Alerting",     :detect_alerting],
+      ["logging",             "Logging",                    :detect_logging_stack],
+      ["tracing",             "Distributed Tracing",        :detect_tracing],
+      ["release_engineering", "Release Engineering",        :detect_release_engineering],
+      ["automation",          "Operational Automation",     :detect_automation],
+      ["reliability_testing", "Testing for Reliability",    :detect_chaos],
+      ["dr",                  "Disaster Recovery",          :detect_dr],
+      ["postmortem",          "Blameless Postmortems",      :detect_postmortems]
+    ]
   }.freeze
 
   GIT_URL = %r{\A(https?://|git@[\w.-]+:|ssh://)}
 
-  def self.assess(location)
-    new(location).assess
+  def self.assess(location, framework: "tech")
+    new(location, framework).assess
   end
 
-  def initialize(location)
+  def initialize(location, framework = "tech")
     @location = location.to_s.strip
+    @framework = framework.to_s
   end
 
   def assess
@@ -51,16 +68,22 @@ class RepoAssessmentService
     return Result.new(source: @location, scores: {}, findings: [], error: error) if error
 
     @dir = dir
-    findings = CAPABILITY_TITLES.keys.filter_map do |key|
-      result = send("detect_#{key}")
+    findings = detectors.filter_map do |slug, title, method|
+      result = send(method)
       next unless result
 
       level, note = result
-      Finding.new(key: key, title: CAPABILITY_TITLES[key], level: level, note: note)
+      Finding.new(key: slug, title: title, level: level, note: note)
     end
     Result.new(source: @location, scores: findings.to_h { |f| [f.key, f.level] }, findings: findings, error: nil)
   ensure
     FileUtils.remove_entry(dir) if cleanup && dir && Dir.exist?(dir)
+  end
+
+  private
+
+  def detectors
+    DETECTORS[@framework] || DETECTORS["tech"]
   end
 
   private
@@ -266,5 +289,90 @@ class RepoAssessmentService
     [2, "#{tags} release tag(s)"]
   rescue Errno::ENOENT
     nil # git not installed in this environment
+  end
+
+  # True if any matching file's contents match the pattern (bounded scan).
+  def grep?(pattern, *globs)
+    globs.any? do |g|
+      Dir.glob(File.join(@dir, g), File::FNM_CASEFOLD).first(200).any? do |f|
+        File.file?(f) && (File.read(f) rescue "").match?(pattern)
+      end
+    end
+  end
+
+  # --- SRE detectors (each returns [level, note] or nil) ---
+
+  def detect_slo # Service Level Objectives
+    return [4, "SLO definitions with error budgets"] if grep?(/error.?budget/i, "**/*.slo.{yml,yaml}", "**/slo*.{yml,yaml}")
+    return [3, "SLO definitions present"] if any?("**/*.slo.{yml,yaml}", "**/slo/**", "**/sloth*.{yml,yaml}") || deps.include?("openslo")
+
+    nil
+  end
+
+  def detect_metrics # Four Golden Signals (Prometheus/metrics)
+    return [3, "Prometheus / metrics instrumentation present"] if any?(
+      "**/prometheus.{yml,yaml}", "**/prometheus/**", "**/servicemonitor*.{yml,yaml}"
+    ) || %w[prom-client prometheus_client micrometer prometheus-client].any? { |l| deps.include?(l) }
+
+    nil
+  end
+
+  def detect_dashboards # Dashboards
+    any?("**/grafana/**", "**/dashboards/*.json", "**/*dashboard*.json") ? [3, "Grafana/dashboard definitions present"] : nil
+  end
+
+  def detect_alerting # Symptom-based Alerting
+    return [3, "Alerting rules present"] if any?("**/*.rules.{yml,yaml}", "**/alertmanager*.{yml,yaml}", "**/alerts/**") ||
+                                            grep?(/kind:\s*PrometheusRule|alert:\s/i, "**/*.{yml,yaml}")
+
+    nil
+  end
+
+  def detect_logging_stack # Logging
+    return [3, "Centralized logging configuration present"] if any?(
+      "**/fluent*.conf", "**/fluent-bit*.{conf,yaml}", "**/logstash*.{conf,yml,yaml}", "**/vector.{toml,yaml}"
+    ) || %w[lograge fluentd logstash serilog structlog winston].any? { |l| deps.include?(l) }
+
+    nil
+  end
+
+  def detect_tracing # Distributed Tracing
+    return [3, "Distributed tracing instrumentation present"] if any?("**/otel-collector*.{yml,yaml}", "**/jaeger*.{yml,yaml}") ||
+                                                                 %w[opentelemetry jaeger zipkin opentracing].any? { |l| deps.include?(l) }
+
+    nil
+  end
+
+  def detect_release_engineering # Release Engineering
+    gitops = any?("**/argocd/**", "**/flux/**", "**/.argo*/**") || grep?(/argo|flux|spinnaker/i, ".github/workflows/*.{yml,yaml}")
+    canary = any?("**/rollout*.{yml,yaml}") || %w[flagger argo-rollouts].any? { |l| deps.include?(l) }
+    return [4, "Progressive delivery (canary/rollouts) configured"] if canary
+    return [3, "GitOps / CD pipeline present"] if gitops
+    return [2, "CI pipeline present"] if detect_b5
+
+    nil
+  end
+
+  def detect_automation # Operational Automation (IaC)
+    detect_c7 ? [3, "Infrastructure-as-code / automation present"] : nil
+  end
+
+  def detect_chaos # Testing for Reliability (chaos engineering)
+    return [3, "Chaos / resilience testing tooling present"] if any?("**/chaos/**", "**/*chaos*.{yml,yaml}") ||
+                                                                %w[litmus chaostoolkit gremlin chaos-mesh].any? { |l| deps.include?(l) }
+
+    nil
+  end
+
+  def detect_dr # Disaster Recovery
+    return [3, "Backup / disaster-recovery configuration present"] if any?(
+      "**/velero/**", "**/backup*.{yml,yaml,sh}", "**/*restore*.{yml,yaml,sh}"
+    ) || deps.include?("velero")
+
+    nil
+  end
+
+  def detect_postmortems # Blameless Postmortems
+    any?("**/postmortem*", "**/post-mortem*", "docs/incidents/**", "**/incident*report*") ? [3, "Postmortem / incident documentation present"] : nil
   end
 end

@@ -81,7 +81,7 @@ class ScoresController < ApplicationController
 
   # Pre-fill detected capability levels from a repository scan (slug -> level).
   def apply_repo_assessment(location)
-    @repo_assessment = RepoAssessmentService.assess(location)
+    @repo_assessment = RepoAssessmentService.assess(location, framework: @framework.slug)
     return if @repo_assessment.error
 
     by_slug = @framework.capabilities.index_by(&:slug)

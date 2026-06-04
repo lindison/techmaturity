@@ -31,6 +31,26 @@ class RepoAssessmentServiceTest < ActiveSupport::TestCase
     assert RepoAssessmentService.assess("").error
   end
 
+  test "detects SRE signals when assessing with the SRE framework" do
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, "monitoring"))
+      File.write(File.join(dir, "monitoring/prometheus.yml"), "scrape_configs: []")
+      File.write(File.join(dir, "monitoring/app.rules.yml"), "groups:\n- rules:\n  - alert: HighErrorRate")
+      FileUtils.mkdir_p(File.join(dir, "grafana"))
+      File.write(File.join(dir, "grafana/overview.json"), "{}")
+      File.write(File.join(dir, "main.tf"), "resource \"null_resource\" \"x\" {}")
+
+      result = RepoAssessmentService.assess(dir, framework: "sre")
+
+      assert_nil result.error
+      assert result.scores["golden_signals"], "prometheus -> golden signals"
+      assert result.scores["dashboards"], "grafana -> dashboards"
+      assert result.scores["alerting"], "rules -> alerting"
+      assert result.scores["automation"], "terraform -> automation"
+      refute result.scores.key?("a3"), "should not return Tech slugs for the SRE framework"
+    end
+  end
+
   test "refuses to clone internal/private hosts (SSRF guard)" do
     [
       "http://127.0.0.1/x.git",
