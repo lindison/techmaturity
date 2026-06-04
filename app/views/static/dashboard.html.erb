@@ -1,83 +1,64 @@
-<% if @summary.nil? %>
-	<div class="page__content" style="text-align:center; padding:60px 20px">
-		<h1>No assessment data yet</h1>
-		<p>There are no scored applications to summarize.</p>
-		<%= link_to 'Manage data', data_path, class: 'button button--cta' %>
-	</div>
-<% else %>
-<% capability_label = get_capability_labels %>
-<% scores_array = @summary.get_capability_array %>
-<% score_description = @summary.score_description_array(0) %>
-<% next_score_description = @summary.score_description_array(1) %>
-
-<div class="stats">
-	<%= link_to "javascript:void(0)", :onclick=>"openSlider('slider-data')" do%>
-	<div class="col-xs-6 col-md-4 stats-item">
-		<div class="stats-title text-center">
-			<p> Native Cloud Readiness Score</p>
-		</div>
-		<div class="stats-val text-center">
-			<p><%= @summary[:total].nil? ? 0 : @summary[:total].round(2) %>%	</p>
-		</div>
-	</div>
-	<%end%>
-	<%= link_to products_path do%>
-	<div class="col-xs-6 col-md-4 stats-item">
-		<div class="stats-title text-center">
-			<p> Total Number of Assets </p>
-		</div>
-		<div class="stats-val text-center">
-			<p><%= @products_count %></p>
-		</div>
-	</div>
-	<% end %>
-	<% if CONFIGS[:enable_asset_creation] %>
-		<%= link_to new_product_path do%>
-		<div class="col-xs-6 col-md-4 stats-item">
-			<div class="stats-title text-center">
-				<p> Add a new Asset </p>
-			</div>
-			<div class="stats-val text-center">
-				<p>+</p>
-			</div>
-		</div>
-		<% end %>
-	<% else %>
-		<div class="col-xs-6 col-md-4 stats-item">
-			<div class="stats-title text-center">
-				<p>Adding asset feature has been disabled.</p>
-				<% unless notice.nil? %>
-					<div class="alert alert-<%=notice["type"]%> alert-dismissable">
-						<a href="/" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-						<p id="notice"><%= notice["message"] %></p>
-					</div>
-				<% end %>
-			</div>
-		</div>
+<div class="page__content subheader">
+	<% @frameworks.each do |fw| %>
+		<%= link_to fw.name, root_path(framework: fw.slug),
+			class: "button #{fw.id == @framework&.id ? 'button--cta' : 'button--minor'}", style: 'margin-right:6px' %>
 	<% end %>
 </div>
 
+<% unless @has_data %>
+	<div class="page__content" style="text-align:center; padding:60px 20px">
+		<h1>No <%= @framework&.name %> assessment data yet</h1>
+		<p>There are no scored applications to summarize for this maturity model.</p>
+		<%= link_to 'Manage data', data_path, class: 'button button--cta' if CONFIGS[:enable_data_management] %>
+	</div>
+<% else %>
+<% palette = ['#DFF3FB', '#BFE6F7', '#80CEEF', '#0097D3', '#0075A7'] %>
+<% capability_colors = @framework.dimensions.order(:position).each_with_index.flat_map { |d, i| Array.new(d.capabilities.size, palette[i % palette.size]) } %>
+
+<div class="stats">
+	<%= link_to "javascript:void(0)", :onclick=>"openSlider('slider-data')" do %>
+	<div class="col-xs-6 col-md-4 stats-item">
+		<div class="stats-title text-center"><p><%= @framework.name %> Readiness Score</p></div>
+		<div class="stats-val text-center"><p><%= @org_readiness.round(2) %>%</p></div>
+	</div>
+	<% end %>
+	<%= link_to products_path do %>
+	<div class="col-xs-6 col-md-4 stats-item">
+		<div class="stats-title text-center"><p>Total Number of Assets</p></div>
+		<div class="stats-val text-center"><p><%= @products_count %></p></div>
+	</div>
+	<% end %>
+	<% if CONFIGS[:enable_asset_creation] %>
+		<%= link_to new_product_path do %>
+		<div class="col-xs-6 col-md-4 stats-item">
+			<div class="stats-title text-center"><p>Add a new Asset</p></div>
+			<div class="stats-val text-center"><p>+</p></div>
+		</div>
+		<% end %>
+	<% end %>
+</div>
 
 <div class="page__content">
 	<canvas id="category-average-graph" width="400" height="100"></canvas>
 </div>
 
 <div class="slider-data">
-	<div class="title"> <h1> Organization wide Score Descriptions </h1> </div>
+	<div class="title"><h1>Organization-wide Score Descriptions</h1></div>
 	<div class="content">
 		<table class="table table-hover table-bordered">
 			<thead>
 				<tr>
-					<th bgcolor="#D0006F" style="color: #FFF"> Title </th>
-					<th bgcolor="#D0006F" style="color: #FFF"> Score </th>
-					<th bgcolor="#D0006F" style="color: #FFF"> Current Score Description </th>
+					<th bgcolor="#D0006F" style="color: #FFF">Title</th>
+					<th bgcolor="#D0006F" style="color: #FFF">Score</th>
+					<th bgcolor="#D0006F" style="color: #FFF">Current Score Description</th>
 				</tr>
 			</thead>
-			<% scores_array.each_with_index do |score, index| %>
+			<% @framework.capabilities.each_with_index do |capability, index| %>
+				<% value = @org_capability_values[index].to_f %>
 				<tr>
-					<td><%= capability_label[index] %></td>
-					<td><%= score %></td>
-					<td><%= score_description[index] %></td>
+					<td><%= capability.name %></td>
+					<td><%= value.round(1) %></td>
+					<td><%= capability.level(value.round.clamp(1, 4))&.description if value.positive? %></td>
 				</tr>
 			<% end %>
 		</table>
@@ -89,22 +70,13 @@
 	window.renderChart("category-average-graph", {
 		type: 'bar',
 		data: {
-			labels: <%= raw get_capability_labels %>,
+			labels: <%= raw @capability_labels.to_json %>,
 			datasets: [{
-				type: 'line',
-				label: 'Category',
-				data: <%= @summary.get_expanded_category_array %>,
-				borderColor: '#000000',
-				borderWidth: 1,
-				tension: 0,
-				pointRadius: 0
+				type: 'line', label: 'Category', data: <%= raw @org_expanded_values.to_json %>,
+				borderColor: '#000000', borderWidth: 1, tension: 0, pointRadius: 0
 			},{
-				type: 'bar',
-				label: 'Capabilities',
-				data: <%= @summary.get_capability_array %>,
-				backgroundColor: ['#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#DFF3FB', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#BFE6F7', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#80CEEF', '#0097D3', '#0097D3', '#0097D3', '#0097D3', '#0097D3', '#0097D3', '#0097D3', '#0097D3', '#0075A7', '#0075A7', '#0075A7', '#0075A7'],
-				borderColor: '#000000',
-				borderWidth: 1
+				type: 'bar', label: 'Capabilities', data: <%= raw @org_capability_values.to_json %>,
+				backgroundColor: <%= raw capability_colors.to_json %>, borderColor: '#000000', borderWidth: 1
 			}]
 		},
 		options: {

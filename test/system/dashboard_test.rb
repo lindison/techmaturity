@@ -2,8 +2,8 @@ require "application_system_test_case"
 
 class DashboardTest < ApplicationSystemTestCase
   test "renders the maturity dashboard and its charts without JS errors" do
-    # A latest score is required for Score.summary to be present on the dashboard.
-    create(:score)
+    # A latest assessment in the (default Tech) framework gives the dashboard data.
+    create(:assessment)
 
     visit root_path
 

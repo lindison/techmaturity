@@ -37,15 +37,16 @@
 		</div>
 	</div>
 
+	<% latest = @product.assessments.latest.first %>
 	<div class="product-link-bottom">
 		<div class="product-link">
 			<div class="product-link-title"> Current Score </div>
 			<div class="product-link-label">
-				<%= @product.is_assessed ? @product.scores.last.total.round(2) : "0" %>%
+				<%= latest ? latest.total.round(2) : "0" %>%
 			</div>
 			<div class="product-link-button">
-				<% if @product.is_assessed? %>
-					<%= link_to "View Current Score", product_score_path(@product, @product.scores.last), :class=>"button" %>
+				<% if latest %>
+					<%= link_to "View Current Score", product_score_path(@product, latest), :class=>"button" %>
 				<% else %>
 					<a href="#" class="button" disabled="true">View Current Score </a>
 				<% end %>
@@ -54,10 +55,10 @@
 		<div class="product-link">
 			<div class="product-link-title"> Total Number of Scores </div>
 			<div class="product-link-label">
-				<%= @product.is_assessed ? @product.scores.count : "0" %>
+				<%= @product.assessments.count %>
 			</div>
 			<div class="product-link-button">
-				<% if @product.is_assessed? %>
+				<% if latest %>
 					<%= link_to "View all Scores", product_scores_path(@product), :class=>"button"%>
 				<% else %>
 					<a href="#" class="button" disabled="true">View all Scores</a>
@@ -65,14 +66,14 @@
 			</div>
 		</div>
 		<div class="product-link">
-			<% if @product.is_assessed? %>
+			<% if latest %>
 					<div class="product-link-title"> Re-Evaluate Asset </div>
 				<% else %>
 					<div class="product-link-title"> Evaluate Asset </div>
 				<% end %>
 			<div class="product-link-label">+</div>
       <div class="product-link-button">
-        <% if @product.is_assessed? %>
+        <% if latest %>
           <%= link_to 'Re-Evaluate Asset', new_product_score_path(@product), :class=>"button"%>
         <% else %>
           <% if @product.is_assessable? %>

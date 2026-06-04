@@ -10,9 +10,9 @@
         <small class="help-text"><p class="text-center"><%= product.product_type %></p></small>
       </div>
 
-      <% unless product.scores.empty? %>
+      <% if (assessment = product.assessments.latest.first) %>
         <div class="tile-score">
-          <canvas class="tile-score-chart" data-percentage="<%= product.scores.last.total %>">
+          <canvas class="tile-score-chart" data-percentage="<%= assessment.total %>">
           </canvas>
         </div>
         <div class="tile-score-edit">

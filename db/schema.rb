@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_04_001913) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_04_010216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -89,6 +89,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_001913) do
     t.boolean "is_assessed"
     t.boolean "is_active", default: true
     t.boolean "is_assessable", default: true
+    t.bigint "framework_id"
+    t.index ["framework_id"], name: "index_products_on_framework_id"
   end
 
   create_table "scores", force: :cascade do |t|
@@ -162,4 +164,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_001913) do
   add_foreign_key "capabilities", "dimensions"
   add_foreign_key "capability_levels", "capabilities"
   add_foreign_key "dimensions", "frameworks"
+  add_foreign_key "products", "frameworks"
 end

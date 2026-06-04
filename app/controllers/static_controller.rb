@@ -5,9 +5,17 @@ class StaticController < ApplicationController
   before_action :require_data_management, only: %i[data load_sample reset_database]
 
   def dashboard
-    # Score.summary always returns one (all-NULL) row, so guard on real data.
-    @summary = Score.where(latest: true).exists? ? Score.summary[0] : nil
+    @frameworks = Framework.ordered
+    @framework = Framework.find_by(slug: params[:framework]) || Framework.default
     @products_count = Product.count
+    @has_data = @framework.present? && @framework.assessments.latest.exists?
+
+    return unless @has_data
+
+    @capability_labels = @framework.capabilities.map(&:name)
+    @org_capability_values = Assessment.org_capability_values(@framework)
+    @org_expanded_values = Assessment.org_expanded_dimension_values(@framework)
+    @org_readiness = Assessment.org_readiness(@framework)
   end
 
   def docs; end

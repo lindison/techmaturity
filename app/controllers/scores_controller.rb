@@ -1,38 +1,43 @@
 
-# Scores controller permits only creation and view (index and show)
+# Manages assessments (still surfaced under the "scores" routes/UI term).
+# Each saved "score" is an Assessment of a product against its framework, with
+# one response per capability.
 class ScoresController < ApplicationController
   before_action :set_product
-  before_action :set_score, only: [:show]
+  before_action :set_assessment, only: [:show]
 
-  # GET /scores
-  # GET /scores.json
+  # GET /products/:id/scores
   def index
-    @scores = @product.scores.all
+    @framework = @product.framework_or_default
+    @assessments = @product.assessments.where(framework: @framework).order(:created_at)
   end
 
-  # GET /scores/1
-  # GET /scores/1.json
-  def show; end
+  # GET /products/:id/scores/:id
+  def show
+    @framework = @assessment.framework
+  end
 
-  # GET /scores/new
+  # GET /products/:id/scores/new
   def new
-    build_params = @product.scores.last.nil? ? {} : @product.scores.last.attributes
-    @score = @product.scores.new(build_params)
+    @framework = @product.framework_or_default
+    @assessment = @product.assessments.new(framework: @framework)
+    prefill_from_last_assessment
     apply_repo_assessment(params[:repo]) if params[:repo].present? && CONFIGS[:enable_repo_assessment]
   end
 
-  # POST /scores
-  # POST /scores.json
+  # POST /products/:id/scores
   def create
-    @score = @product.scores.new(score_params)
-    respond_to do |format|
-      if @product.is_assessable? && @score.save
-        format.html { redirect_to @product, notice: { type: 'success', message: 'Score was successfully created.' } }
-        format.json { render :show, status: :created, location: @score }
-      else
-        format.html { render :new, notice: { type: 'danger', message: 'Score failed to create.' } }
-        format.json { render json: @score.errors, status: :unprocessable_entity }
-      end
+    @framework = @product.framework_or_default
+    @assessment = @product.assessments.new(framework: @framework, comment: response_params[:comment])
+    build_responses(response_params[:responses])
+
+    if @product.is_assessable? && @assessment.save
+      @assessment.make_latest!
+      @product.update(is_assessed: true)
+      redirect_to @product, notice: { type: 'success', message: 'Assessment was successfully saved.' }
+    else
+      flash.now[:notice] = { type: 'danger', message: 'Assessment failed to save.' }
+      render :new
     end
   end
 
@@ -42,24 +47,52 @@ class ScoresController < ApplicationController
     @product = Product.find(params[:product_id])
   end
 
-  def set_score
-    @score = @product.scores.find(params[:id])
+  def set_assessment
+    @assessment = @product.assessments.find(params[:id])
   end
 
-  # Pre-fills the draft score from a repository assessment. Detected capability
-  # levels are filled in; everything else is left blank for the assessor.
+  def response_params
+    params.fetch(:score, {}).permit(:comment, responses: {})
+  end
+
+  # responses is { "<capability_id>" => "<level 1-4>" }. Only capabilities
+  # belonging to this product's framework are accepted.
+  def build_responses(responses)
+    return if responses.blank?
+
+    allowed = @framework.capabilities.index_by(&:id)
+    responses.each do |capability_id, value|
+      next if value.blank?
+
+      capability = allowed[capability_id.to_i]
+      @assessment.assessment_responses.build(capability: capability, value: value.to_i) if capability
+    end
+  end
+
+  # "Re-Evaluate" starts from the previous assessment's answers.
+  def prefill_from_last_assessment
+    last = @product.assessments.where(framework: @framework).order(:created_at).last
+    return unless last
+
+    last.assessment_responses.each do |response|
+      @assessment.assessment_responses.build(capability_id: response.capability_id, value: response.value)
+    end
+  end
+
+  # Pre-fill detected capability levels from a repository scan (slug -> level).
   def apply_repo_assessment(location)
-    @assessment = RepoAssessmentService.assess(location)
-    return if @assessment.error
+    @repo_assessment = RepoAssessmentService.assess(location)
+    return if @repo_assessment.error
 
-    @assessment.scores.each { |capability, level| @score[capability] = level }
-    @score.comment = "Auto-assessed from #{@assessment.source}\n" +
-                     @assessment.findings.map { |f| "#{f.title} (#{f.key.upcase}) = Level #{f.level} — #{f.note}" }.join("\n")
-  end
+    by_slug = @framework.capabilities.index_by(&:slug)
+    @repo_assessment.scores.each do |slug, level|
+      capability = by_slug[slug]
+      next unless capability
 
-  def score_params
-    params.require(:score).permit(:a1, :a2, :a3, :a4, :a5, :a6, :a7, :a8, :a9, :a10, :a11, :a12,
-                                  :b1, :b2, :b3, :b4, :b5, :b6, :b7, :b8, :c1, :c2, :c3, :c4, :c5, :c6, :c7, :c8,
-                                  :c9, :c10, :d1, :d2, :d3, :d4, :d5, :d6, :d7, :d8, :e1, :e2, :e3, :e4, :comment)
+      response = @assessment.assessment_responses.detect { |r| r.capability_id == capability.id }
+      response ? response.value = level : @assessment.assessment_responses.build(capability: capability, value: level)
+    end
+    @assessment.comment = "Auto-assessed from #{@repo_assessment.source}\n" +
+                          @repo_assessment.findings.map { |f| "#{f.title} (#{f.key.upcase}) = Level #{f.level} — #{f.note}" }.join("\n")
   end
 end

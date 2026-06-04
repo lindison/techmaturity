@@ -1,6 +1,6 @@
 
 <div class="page__content subheader">
-	<h1 class="pull-left"><%= (@product.is_assessed?) ? "Updating" : "Adding" %> Score for <%= @product.name %></h1>
+	<h1 class="pull-left"><%= (@product.is_assessed?) ? "Updating" : "Adding" %> <%= @framework.name %> Score for <%= @product.name %></h1>
 	<%# The HTML5 form= attribute submits the score form (below) natively, so no
 	    JS is needed for this header button. %>
 	<button id="form-submitter" type="submit" form="score-form" class="button button--cta pull-right"> Save Score </button>
@@ -17,15 +17,15 @@
 		<%= submit_tag 'Assess from repository', class: 'button button--cta' %>
 	<% end %>
 
-	<% if @assessment %>
-		<% if @assessment.error %>
-			<div class="alert alert-danger"><%= @assessment.error %></div>
+	<% if @repo_assessment %>
+		<% if @repo_assessment.error %>
+			<div class="alert alert-danger"><%= @repo_assessment.error %></div>
 		<% else %>
 			<div class="alert alert-success">
-				<p>Pre-filled <strong><%= @assessment.findings.size %></strong> of 42 capabilities from
-					<code><%= @assessment.source %></code>. Review them, complete the rest, then Save.</p>
+				<p>Pre-filled <strong><%= @repo_assessment.findings.size %></strong> of <%= @framework.capabilities.count %> capabilities from
+					<code><%= @repo_assessment.source %></code>. Review them, complete the rest, then Save.</p>
 				<ul>
-					<% @assessment.findings.each do |f| %>
+					<% @repo_assessment.findings.each do |f| %>
 						<li><strong><%= f.title %></strong> &rarr; Level <%= f.level %>
 							<small>(<%= f.note %>)</small></li>
 					<% end %>
@@ -37,5 +37,5 @@
 <% end %>
 
 <div class="page__content main-content progressive-form-container">
-	<%= render 'form', product: @product, score: @score %>
+	<%= render 'form' %>
 </div>

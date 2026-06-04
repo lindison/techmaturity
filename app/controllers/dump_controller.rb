@@ -4,7 +4,7 @@
 class DumpController < ApplicationController
 
     def dump
-        @products = Product.all.includes(:tags, :scores)
+        @products = Product.all.includes(:tags, :framework, assessments: { assessment_responses: :capability })
     end
 
 end

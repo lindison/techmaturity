@@ -36,21 +36,19 @@ export default class extends Controller {
     if (this.current > 0) this.showStep(this.current - 1)
   }
 
-  // Delegated from a click action on the wrapper.
+  // Delegated from a click action on the wrapper. Selecting a cell always picks
+  // that level (deterministic regardless of whether the label or padding was
+  // clicked) and clears the other levels in the same row.
   toggleSelectable(event) {
     const cell = event.target.closest(".selectable")
     if (!cell || !this.element.contains(cell)) return
 
     const radio = cell.querySelector("input[type=radio]")
-    if (radio) radio.checked = !radio.checked
+    if (radio) radio.checked = true
 
-    if (cell.classList.contains("selected")) {
-      cell.classList.remove("selected")
-    } else {
-      cell.parentElement
-        .querySelectorAll(".selectable")
-        .forEach((sibling) => sibling.classList.remove("selected"))
-      cell.classList.add("selected")
-    }
+    cell.parentElement
+      .querySelectorAll(".selectable")
+      .forEach((sibling) => sibling.classList.remove("selected"))
+    cell.classList.add("selected")
   }
 }

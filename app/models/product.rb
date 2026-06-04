@@ -2,6 +2,12 @@ class Product < ApplicationRecord
 	has_many :tags, :dependent => :destroy
 	has_many :scores, :dependent => :destroy
 	has_many :assessments, :dependent => :destroy
+	belongs_to :framework, optional: true
+
+	# The framework this product is assessed against (defaults to Tech).
+	def framework_or_default
+	  framework || Framework.default
+	end
   
 	validates :name, presence: true
 	validates :product_type, presence: true

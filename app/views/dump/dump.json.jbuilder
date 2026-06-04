@@ -1,31 +1,32 @@
-
 json.array!(@products) do |product|
+  framework = product.framework_or_default
+  assessment = product.assessments.latest.first
 
-  category_labels = get_category_labels
-  category_scores = product.scores.last.get_category_array
-  capability_labels = get_capability_labels
-  capability_score = product.scores.last.get_capability_array
-
-  json.set! :productInfo do 
+  json.set! :productInfo do
     json.name product.name
     json.type product.product_type
+    json.framework framework&.name
     product.tags.each do |tag|
       json.set! tag.key, tag.value
     end
   end
 
-  json.set! :categories do 
-    category_labels.each_with_index do |category,index|
-      json.set! category, category_scores[index]
+  next unless assessment
+
+  dimension_values = assessment.dimension_values
+  capability_values = assessment.capability_values
+
+  json.set! :categories do
+    framework.dimensions.order(:position).each_with_index do |dimension, index|
+      json.set! dimension.name, dimension_values[index]
     end
   end
 
-  json.set! :capabilities do 
-    capability_labels.each_with_index do |capability,index|
-      json.set! capability, capability_score[index]
+  json.set! :capabilities do
+    framework.capabilities.each_with_index do |capability, index|
+      json.set! capability.name, capability_values[index]
     end
   end
 
-  json.cloudScore product.scores.last.total
-
+  json.cloudScore assessment.total
 end

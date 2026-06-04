@@ -1,42 +1,34 @@
 require "application_system_test_case"
 
-# Locks the behavior of the multi-step score-entry form (scores/_form.html.erb)
-# before it is ported off jQuery: progressive disclosure of one step at a time,
-# selecting a level, advancing steps, and submitting to create a score.
+# The score form is now generated from the product's framework (dimensions ->
+# capabilities -> levels). This locks its multi-step behavior and submission.
 class ScoreFormTest < ApplicationSystemTestCase
   setup do
-    @product = create(:product_with_tags)
+    @product = create(:product_with_tags) # defaults to the Tech framework
+    @framework = @product.framework_or_default
     visit new_product_score_path(@product)
-    # Defensively dismiss the onboarding overlay if present so it can't
-    # intercept clicks (it is disabled in the test env, belt and suspenders).
-    page.execute_script("document.querySelector('.first-time-page-wrapper')?.remove()")
   end
 
-  test "shows only the first step until the user advances" do
-    # Step 1 (category "Code") is visible; step 2 (category "Build and Test")
-    # is present but hidden.
-    assert_selector ".progressive-form[class~='1']", text: "Code", visible: true
-    assert_no_selector ".progressive-form[class~='2']", visible: true
+  test "shows one step at a time and advances to the next dimension" do
+    assert_selector ".progressive-form", visible: true, count: 1
+    assert_selector ".progressive-form-title", text: "Code", visible: true # dimension 1
 
-    # Step 1 has a Next at the top and bottom (both paginate to step 2); the
-    # first visible one is in the open step.
     first(:button, "Next", visible: true).click
 
-    assert_no_selector ".progressive-form[class~='1']", visible: true
-
-    assert_selector ".progressive-form[class~='2']", text: "Build and Test", visible: true
+    assert_selector ".progressive-form-title", text: "Build and Test", visible: true # dimension 2
   end
 
   test "selecting a level checks that capability's radio" do
-    cell = find(:xpath, "//input[@id='score_a1_2']/ancestor::td[contains(@class,'selectable')]")
+    capability = @framework.capabilities.first
+    cell = find(:xpath, "//input[@id='cap_#{capability.id}_2']/ancestor::td[contains(@class,'selectable')]")
     cell.click
 
-    assert find("#score_a1_2", visible: :all).checked?
+    assert find("#cap_#{capability.id}_2", visible: :all).checked?
     assert cell[:class].include?("selected")
   end
 
-  test "submitting the form creates a score for the product" do
-    assert_difference -> { @product.scores.count }, 1 do
+  test "submitting the form creates an assessment for the product" do
+    assert_difference -> { @product.assessments.count }, 1 do
       find("#form-submitter").click
       assert_current_path product_path(@product) # redirect on success
     end

@@ -46,27 +46,25 @@ class SampleDataService
     ["Syslog Aggregator",            "Sub component", %w[platform logging]]
   ].freeze
 
-  CAPABILITY_KEYS = (
-    (1..12).map { |i| "a#{i}" } + (1..8).map { |i| "b#{i}" } +
-    (1..10).map { |i| "c#{i}" } + (1..8).map { |i| "d#{i}" } +
-    (1..4).map  { |i| "e#{i}" }
-  ).freeze
-
-  # Creates any apps that don't already exist, each with a random latest score
-  # and its service tags. Returns the number of apps created.
+  # Creates any apps that don't already exist, each assessed against the Tech
+  # framework with a random latest assessment + service tags. Returns the count.
   def self.load_infoblox!
+    framework = Framework.find_by(slug: "tech") || FrameworkSeeder.seed_tech!
+    capabilities = framework.capabilities.to_a
+
     INFOBLOX_APPS.count do |name, product_type, tags|
       next false if Product.unscoped.exists?(name: name)
 
-      # Create unassessed: the first score's callback assesses the product.
-      product = Product.create!(name: name, product_type: product_type)
+      product = Product.create!(name: name, product_type: product_type, framework: framework, is_assessed: true)
       tags.each { |value| product.tags.create!(key: "service", value: value) }
-      product.scores.create!(CAPABILITY_KEYS.index_with { rand(1..4) })
+      assessment = product.assessments.create!(framework: framework)
+      capabilities.each { |capability| assessment.assessment_responses.create!(capability: capability, value: rand(1..4)) }
+      assessment.make_latest!
       true
     end
   end
 
-  # Removes every product (and, via dependent: :destroy, its scores and tags).
+  # Removes every product (cascading to assessments, responses, scores, tags).
   # unscoped so inactive products are cleared too.
   def self.clear!
     Product.unscoped.destroy_all

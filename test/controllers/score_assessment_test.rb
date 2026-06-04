@@ -8,8 +8,9 @@ class ScoreAssessmentTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".alert-success"
-    # Test Suite (a3) is detected at level 3, so that radio is pre-checked.
-    assert_select "input#score_a3_3[checked]"
+    # Test Suite (a3) is detected at level 3, so that capability's radio is pre-checked.
+    a3 = Framework.find_by(slug: "tech").capabilities.find_by(slug: "a3")
+    assert_select "input#cap_#{a3.id}_3[checked]"
   end
 
   test "new score form shows an error for an invalid repo and stays usable" do
