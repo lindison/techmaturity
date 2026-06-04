@@ -39,4 +39,7 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Jobs are enqueued, not run, unless a test wraps them in perform_enqueued_jobs.
+  config.active_job.queue_adapter = :test
 end

@@ -26,7 +26,18 @@ class ScoresController < ApplicationController
     @frameworks = Framework.ordered.to_a
     @prefill = {} # capability_id => level (1-4)
     prefill_from_last_assessments
-    apply_repo_assessment(params[:repo]) if params[:repo].present? && CONFIGS[:enable_repo_assessment]
+
+    if params[:repo].present? && CONFIGS[:enable_repo_assessment]
+      @scan = find_or_start_scan(params[:repo])
+      @prefill.merge!(@scan.prefill) if @scan.complete?
+    end
+  end
+
+  # GET /products/:id/scores/scan_status?id=
+  # Polled by the scanning page until the background assessment finishes.
+  def scan_status
+    scan = @product.repo_scans.find(params[:id])
+    render json: { status: scan.status, progress: scan.progress, error: scan.error }
   end
 
   # POST /products/:id/scores
@@ -92,20 +103,19 @@ class ScoresController < ApplicationController
     end
   end
 
-  # Scan/clone the repo once per framework (each scores against its own rubric)
-  # and merge detected levels into @prefill, keyed by capability id.
-  def apply_repo_assessment(location)
-    results = @frameworks.map { |framework| [framework, RepoAssessmentService.assess(location, framework: framework.slug)] }
-    @repo_assessments = results.reject { |_framework, result| result.error }
-    @repo_error = results.filter_map { |_framework, result| result.error }.first if @repo_assessments.empty?
-    @repo_source = @repo_assessments.first&.last&.source
-
-    @repo_assessments.each do |framework, result|
-      by_slug = framework.capabilities.index_by(&:slug)
-      result.scores.each do |slug, level|
-        capability = by_slug[slug]
-        @prefill[capability.id] = level if capability
-      end
+  # The repo assessment (file detectors + minutes-long chunked LLM analysis,
+  # across every framework) runs in a background job. Reuse the latest scan for
+  # this repo — whether complete, failed, or still running — so reloads show its
+  # result instead of restarting; only start fresh if there is none, it's stale
+  # (a dead in-flight run), or the user explicitly asked to re-scan.
+  def find_or_start_scan(repo)
+    unless params[:rescan]
+      scan = @product.repo_scans.where(repo: repo).recent.first
+      return scan if scan && !scan.stale?
     end
+
+    scan = @product.repo_scans.create!(repo: repo, status: "pending", progress: 0)
+    RepoScanJob.perform_later(scan.id)
+    scan
   end
 end

@@ -20,7 +20,9 @@ Rails.application.routes.draw do
 
   # Restful resources
   resources :products do
-    resources :scores, except: [:destroy, :update, :edit]
+    resources :scores, except: [:destroy, :update, :edit] do
+      get :scan_status, on: :collection
+    end
     resources :tags, except: [:index, :show]
   end
 

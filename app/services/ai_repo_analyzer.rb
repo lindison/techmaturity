@@ -30,9 +30,12 @@ class AiRepoAnalyzer
     CONFIGS[:enable_ai_analysis] && ENV["OR_DELPHI_API_KEY"].present?
   end
 
-  def initialize(dir, framework)
+  # progress: optional callable invoked as (chunks_done, chunks_total) after each
+  # chunk is scored, so a background job can surface live progress.
+  def initialize(dir, framework, progress: nil)
     @dir = dir
     @framework = framework
+    @progress = progress
   end
 
   # Returns an array of RepoAssessmentService::Finding (possibly empty).
@@ -80,6 +83,8 @@ class AiRepoAnalyzer
     queue = Queue.new
     parts.each_with_index { |chunk, i| queue << [i, chunk] }
     results = Array.new(parts.size, [])
+    done = 0
+    lock = Mutex.new
 
     workers = Array.new([CONCURRENCY, parts.size].min) do
       Thread.new do
@@ -91,11 +96,18 @@ class AiRepoAnalyzer
             Rails.logger.warn("AiRepoAnalyzer: chunk #{i + 1}/#{parts.size} failed: #{e.class}: #{e.message}")
             []
           end
+          lock.synchronize { done += 1; report(done, parts.size) }
         end
       end
     end
     workers.each(&:join)
     results.flatten(1)
+  end
+
+  def report(done, total)
+    @progress&.call(done, total)
+  rescue => e
+    Rails.logger.warn("AiRepoAnalyzer: progress callback failed: #{e.class}: #{e.message}")
   end
 
   # --- reduce: one level per capability from all per-chunk observations --------

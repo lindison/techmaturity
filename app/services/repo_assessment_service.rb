@@ -51,13 +51,14 @@ class RepoAssessmentService
 
   GIT_URL = %r{\A(https?://|git@[\w.-]+:|ssh://)}
 
-  def self.assess(location, framework: "tech")
-    new(location, framework).assess
+  def self.assess(location, framework: "tech", progress: nil)
+    new(location, framework, progress: progress).assess
   end
 
-  def initialize(location, framework = "tech")
+  def initialize(location, framework = "tech", progress: nil)
     @location = location.to_s.strip
     @framework = framework.to_s
+    @progress = progress
   end
 
   def assess
@@ -92,7 +93,7 @@ class RepoAssessmentService
     return [] unless AiRepoAnalyzer.available?
 
     framework = Framework.find_by(slug: @framework)
-    framework ? AiRepoAnalyzer.new(@dir, framework).analyze : []
+    framework ? AiRepoAnalyzer.new(@dir, framework, progress: @progress).analyze : []
   end
 
   # AI findings (deeper) take precedence over file-detector findings by slug.

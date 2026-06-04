@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
 	has_many :tags, :dependent => :destroy
 	has_many :assessments, :dependent => :destroy
+	has_many :repo_scans, :dependent => :destroy
 	belongs_to :framework, optional: true
 
 	# The framework this product is assessed against (defaults to Tech).

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_04_014104) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_04_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -93,6 +93,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_014104) do
     t.index ["framework_id"], name: "index_products_on_framework_id"
   end
 
+  create_table "repo_scans", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.string "repo", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "progress", default: 0, null: false
+    t.text "error"
+    t.jsonb "result", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "created_at"], name: "index_repo_scans_on_product_id_and_created_at"
+    t.index ["product_id"], name: "index_repo_scans_on_product_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "key"
     t.string "value"
@@ -109,4 +122,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_014104) do
   add_foreign_key "capability_levels", "capabilities"
   add_foreign_key "dimensions", "frameworks"
   add_foreign_key "products", "frameworks"
+  add_foreign_key "repo_scans", "products"
 end

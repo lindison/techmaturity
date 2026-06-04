@@ -20,5 +20,10 @@ module Techmaturity
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
+
+    # Repo assessments run as background jobs. The in-process :async adapter runs
+    # them in a thread pool inside the web process (no extra service) — fine for a
+    # single-container deployment. (test overrides this to :test.)
+    config.active_job.queue_adapter = :async
   end
 end
