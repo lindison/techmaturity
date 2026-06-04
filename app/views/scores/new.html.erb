@@ -7,6 +7,7 @@
 	<%= link_to 'Cancel', product_path(@product), class: "button button--dngr pull-right" %>
 </div>
 
+<% if CONFIGS[:enable_repo_assessment] %>
 <div class="page__content main-content">
 	<%# Point the model at a repository to auto-fill the capabilities that leave
 	    detectable signals in source. The rest are left for the assessor. %>
@@ -33,6 +34,7 @@
 		<% end %>
 	<% end %>
 </div>
+<% end %>
 
 <div class="page__content main-content progressive-form-container">
 	<%= render 'form', product: @product, score: @score %>

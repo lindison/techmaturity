@@ -1,6 +1,9 @@
 require "open3"
 require "tmpdir"
 require "fileutils"
+require "uri"
+require "resolv"
+require "ipaddr"
 
 # Inspects a code repository (a local path or a git URL) and infers maturity
 # levels (1-4) for the capabilities that leave detectable signals in source.
@@ -66,12 +69,48 @@ class RepoAssessmentService
     if @location.empty?
       [nil, false, "No repository given"]
     elsif @location.match?(GIT_URL)
+      return [nil, false, "Refusing to clone an internal/private host"] if internal_host?(@location)
+
       clone_repo
     elsif File.directory?(@location)
       [File.expand_path(@location), false, nil]
     else
       [nil, false, "Not a git URL or an existing directory: #{@location}"]
     end
+  end
+
+  # SSRF guard: reject URLs whose host resolves to loopback, link-local
+  # (incl. the cloud metadata IP), or private ranges.
+  PRIVATE_RANGES = [
+    "127.0.0.0/8", "0.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
+    "169.254.0.0/16", "::1/128", "fc00::/7", "fe80::/10"
+  ].map { |r| IPAddr.new(r) }.freeze
+
+  def internal_host?(location)
+    host = git_host(location)
+    return true if host.nil? || host.empty?
+
+    addresses = Resolv.getaddresses(host)
+    return true if addresses.empty?
+
+    addresses.any? { |ip| ip_internal?(ip) }
+  rescue StandardError
+    true # fail closed
+  end
+
+  def git_host(location)
+    if (m = location.match(/\Agit@([^:]+):/))
+      m[1]
+    else
+      URI.parse(location).host
+    end
+  end
+
+  def ip_internal?(ip)
+    addr = IPAddr.new(ip)
+    PRIVATE_RANGES.any? { |range| range.include?(addr) }
+  rescue IPAddr::Error
+    true
   end
 
   def clone_repo

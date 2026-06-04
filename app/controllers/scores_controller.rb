@@ -18,7 +18,7 @@ class ScoresController < ApplicationController
   def new
     build_params = @product.scores.last.nil? ? {} : @product.scores.last.attributes
     @score = @product.scores.new(build_params)
-    apply_repo_assessment(params[:repo]) if params[:repo].present?
+    apply_repo_assessment(params[:repo]) if params[:repo].present? && CONFIGS[:enable_repo_assessment]
   end
 
   # POST /scores

@@ -2,6 +2,10 @@ default: &default
   enable_asset_creation: true
   enable_first_time_user_exp: true
   enable_tag_modification: true
+  # Destructive / SSRF-prone admin features — on for local/demo use, OFF in
+  # production by default (see the production block).
+  enable_data_management: true
+  enable_repo_assessment: true
   feedback_slack:
     endpoint: "#endpoint"
     channel_name: "#channel_name"
@@ -25,6 +29,10 @@ production:
   enable_asset_creation: true
   enable_first_time_user_exp: true
   enable_tag_modification: true
+  # Off by default: the DB reset and repo-assessment endpoints are unauthenticated.
+  # Enable explicitly (and set a strong RESET_PIN) only for trusted deployments.
+  enable_data_management: false
+  enable_repo_assessment: false
   feedback_slack:
     endpoint: "https://hooks.slack.com/services/xxx" #put your slack token here upon deployment - don't put slack tokens in public repos ;)
     channel_name: "#techmaturity"

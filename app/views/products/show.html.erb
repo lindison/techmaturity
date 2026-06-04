@@ -21,7 +21,7 @@
 	</div>
 	<div class="product-action-items">
 		<%= link_to 'Edit Asset', edit_product_path(@product), class: "button button--cta action-button" %>
-		<%= link_to 'Remove Asset', @product, method: :delete, data: { confirm: 'Are you sure? This action cannot be reversed' }, class: "button button--dngr action-button" %>
+		<%= link_to 'Remove Asset', @product, data: { turbo_method: :delete, turbo_confirm: 'Are you sure? This action cannot be reversed' }, class: "button button--dngr action-button" %>
 	</div>
 </div>
 

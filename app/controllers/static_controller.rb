@@ -2,6 +2,8 @@
 # Static controller is only for pages that are not
 # associated with any resources
 class StaticController < ApplicationController
+  before_action :require_data_management, only: %i[data load_sample reset_database]
+
   def dashboard
     # Score.summary always returns one (all-NULL) row, so guard on real data.
     @summary = Score.where(latest: true).exists? ? Score.summary[0] : nil
@@ -42,6 +44,12 @@ class StaticController < ApplicationController
   end
 
   private
+
+  # The data page can load demo data and (PIN-gated) wipe the database, so it is
+  # only exposed where explicitly enabled (off in production by default).
+  def require_data_management
+    head :not_found unless CONFIGS[:enable_data_management]
+  end
 
   # Overridable via env; defaults to the agreed demo PIN.
   def reset_pin

@@ -84,7 +84,9 @@
 										<li><a href="<%= docs_path %>">Docs</a></li>
 										<li><a href="<%= about_path %>">About</a></li>
 										<li><a href="<%= contact_path %>">Contact</a></li>
-										<li><a href="<%= data_path %>">Data</a></li>
+										<% if CONFIGS[:enable_data_management] %>
+											<li><a href="<%= data_path %>">Data</a></li>
+										<% end %>
 									</ul>
 								</div>
 							</div>

@@ -30,4 +30,19 @@ class RepoAssessmentServiceTest < ActiveSupport::TestCase
   test "returns an error for blank input" do
     assert RepoAssessmentService.assess("").error
   end
+
+  test "refuses to clone internal/private hosts (SSRF guard)" do
+    [
+      "http://127.0.0.1/x.git",
+      "https://localhost/repo.git",
+      "http://169.254.169.254/latest/meta-data/", # cloud metadata
+      "http://10.0.0.5/r.git",
+      "git@192.168.1.10:team/repo.git"
+    ].each do |url|
+      result = RepoAssessmentService.assess(url)
+      assert result.error, "expected #{url} to be rejected"
+      assert_empty result.scores
+    end
+  end
 end
+

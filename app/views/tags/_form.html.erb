@@ -25,7 +25,7 @@
   <div class="input-group action-item">
     <%= f.submit "Save Tag", class: "button button--cta" %> &nbsp;
     <% unless @tag.id.nil? %>
-      <%= link_to 'Remove Tag', [@product, @tag], method: :delete, data: { confirm: 'Are you sure? This action cannot be reversed' }, class: "button button--dngr" %>
+      <%= link_to 'Remove Tag', [@product, @tag], data: { turbo_method: :delete, turbo_confirm: 'Are you sure? This action cannot be reversed' }, class: "button button--dngr" %>
     <% end %>
   </div>
 <% end %>
