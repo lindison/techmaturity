@@ -1,7 +1,7 @@
 <%# One framework's score history: trend charts + score list.
     Locals: framework, assessments (ordered oldest -> newest). %>
 <%
-	color = ['#FFD69F', '#3BA3CD', '#69C943', '#4F6D7A', '#5D5D5D']
+	color = ['#bd93f9', '#50fa7b', '#ffb86c', '#ff79c6', '#f1fa8c']
 	label_for = ->(i) { i == assessments.size - 1 ? 'Current Score' : "Archive Score #{i + 1}" }
 	slug = framework.slug
 
@@ -20,7 +20,7 @@
 	end
 	org_line = ->(data) do
 		{ label: 'Organizational Average', type: 'line', fill: false, data: data,
-		  borderColor: '#d0006f', backgroundColor: '#d0006f', borderWidth: 1 }
+		  borderColor: '#8be9fd', backgroundColor: '#8be9fd', borderWidth: 1 }
 	end
 
 	category_datasets   = series.call(:dimension_values)  + [org_line.call(Assessment.org_dimension_values(framework))]
@@ -75,7 +75,7 @@
 		data: {
 			labels: <%= raw total_labels.to_json %>,
 			datasets: [{ label: "Total Maturity Score", data: <%= raw total_data.to_json %>,
-				backgroundColor: <%= raw total_colors.to_json %>, borderColor: '#000000', borderWidth: 1 }]
+				backgroundColor: <%= raw total_colors.to_json %>, borderColor: '#6272a4', borderWidth: 1 }]
 		},
 		options:{ plugins: { tooltip: { enabled: false } }, scales: { y: { min: 0, max: 100, beginAtZero: true } } }
 	});

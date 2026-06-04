@@ -11,6 +11,10 @@ import "controllers"
 window.renderChart = (idOrEl, config) => {
   const el = typeof idOrEl === "string" ? document.getElementById(idOrEl) : idOrEl
   if (!el) return null
+  // Dark-theme defaults so axis labels, legends and gridlines are legible on the
+  // dark background (Chart.js defaults to near-black text/grid).
+  window.Chart.defaults.color = "#c8cce0"
+  window.Chart.defaults.borderColor = "rgba(248, 248, 242, 0.10)"
   window.Chart.getChart(el)?.destroy()
   const chart = new window.Chart(el, config)
   el.setAttribute("data-chart-rendered", "true") // lets system tests assert it drew

@@ -840,3 +840,159 @@ a .stats-item:hover .stats-title{
 	display: block;
 	z-index: 50;
 }
+
+/* =========================================================================
+   DARK THEME — "Dracula"
+   This file loads last, so these rules override the Ticketmaster "ln" design
+   system (nucleus*.css) without editing those minified files. Palette:
+   https://draculatheme.com
+   ========================================================================= */
+
+:root {
+	--bg:            #282a36; /* page */
+	--surface:       #21222c; /* header, footer, sidebars, nav strips (deeper) */
+	--panel:         #343746; /* cards, tiles, stat blocks */
+	--panel-2:       #3c3f51; /* hover / raised */
+	--border:        #44475a; /* current-line */
+	--text:          #f8f8f2; /* foreground */
+	--muted:         #a3a9cf; /* secondary text */
+	--primary:       #bd93f9; /* purple — buttons, links, selected */
+	--primary-hover: #d6b8ff;
+	--cta:           #50fa7b; /* green — primary "Save" action */
+	--cta-hover:     #74ffa0;
+	--cyan:          #8be9fd; /* chart "org average" line */
+	--danger:        #ff5555;
+	--danger-hover:  #ff7b7b;
+}
+
+/* --- base surfaces (override nucleus body/.page #fff) --- */
+body, .page {
+	background-color: var(--bg);
+	color: var(--text);
+}
+
+/* --- links --- */
+a { color: var(--primary); }
+a:hover, a:active, a:focus { color: var(--primary-hover); }
+
+/* --- buttons (nucleus defaults are TM blue / green) --- */
+.button, .button-aux {
+	background-color: var(--primary);
+	color: var(--bg);
+}
+.button:hover, .button:active, .button:focus,
+.button-aux:hover, .button-aux:active {
+	background: var(--primary-hover);
+	color: var(--bg);
+}
+.button--cta { background-color: var(--cta); color: var(--bg); }
+.button--cta:hover, .button--cta:active { background: var(--cta-hover); color: var(--bg); }
+.button--dngr { background-color: var(--danger); color: #fff; }
+.button--dngr:hover { background-color: var(--danger-hover); color: #fff; }
+.button--disabled, .button[disabled] {
+	background: var(--border) !important;
+	color: var(--muted) !important;
+	cursor: not-allowed;
+}
+
+/* --- header / footer --- */
+header { background-color: var(--surface); border-bottom: 3px solid var(--primary); }
+footer { background-color: var(--surface); border-top: 3px solid var(--primary); }
+.title a { color: var(--text); }
+.title a:hover { color: var(--primary); }
+.navbar-default .navbar-nav > li > a { color: var(--text); }
+.navbar-default .navbar-nav > li > a:hover { color: var(--primary); }
+.footer { color: var(--muted); }
+
+/* --- subheader / content strips --- */
+.page__content.subheader { background-color: var(--surface); color: var(--text); }
+
+/* --- dashboard stat blocks --- */
+.stats-item { background-color: var(--panel); border-bottom: 5px solid var(--border); }
+.stats-title { color: var(--muted); }
+.stats-val { color: var(--text); }
+a .stats-item:hover .stats-val { color: var(--primary); }
+a .stats-item:hover .stats-title { color: var(--text); }
+.checkbox-inline { background: var(--primary); color: var(--bg); }
+
+/* --- score / product sidebars --- */
+.score-sidebar, .product-sidebar-left, .score-main-nav { background-color: var(--surface); }
+.score-sidebar-value, .product-sidebar-value { color: var(--primary); }
+.score-main-nav-item { border-color: var(--border); }
+.score-main-nav-item:hover, .score-main-nav-item.active {
+	border-color: var(--primary);
+	background-color: var(--panel);
+}
+.product-link { color: var(--text); }
+.help-text { color: var(--muted); }
+
+/* --- product tiles --- */
+.product-tile { border: 1px solid var(--border); background: var(--panel); }
+.product-tile:hover { border: 1px solid var(--primary); }
+
+/* --- tags --- */
+.product-tag, .product-tag.new {
+	background-color: rgba(189, 147, 249, 0.16);
+	color: var(--primary);
+}
+.product-tag.new a { color: var(--primary); }
+.product-tag.new a:hover { color: var(--text); }
+
+/* --- score form: tables + selectable cells --- */
+.table { color: var(--text); border-color: var(--border); }
+.table-bordered, .table-bordered > tbody > tr > td, .table-bordered > tbody > tr > th,
+.table-bordered > thead > tr > th, .table > tbody > tr > td, .table > thead > tr > th {
+	border-color: var(--border) !important;
+}
+.table-hover > tbody > tr:hover, .table-hover > tbody > tr:hover > * {
+	background-color: var(--panel-2);
+}
+.selectable:hover { border: 2px solid var(--primary); }
+.selectable.selected { background: var(--primary); color: var(--bg); }
+.progressive-form-pagenum { color: var(--muted); }
+
+/* --- sliders / modals --- */
+.slider-wrapper { border: 3px solid var(--border); background-color: var(--panel); }
+.slider-header { background-color: var(--surface); }
+.slider-closer a { color: var(--text); }
+.slider-closer a:hover { color: var(--primary); }
+.footer-close-text { color: var(--primary); }
+.message-wrapper, .message-wrapper-footer { background: var(--panel); }
+.message-wrapper-header { background: var(--surface); color: var(--text); }
+.message-left { border-right-color: var(--border); }
+.message-right { border-left-color: var(--border); }
+
+/* --- static pages: dark the white image wash --- */
+.about-left-pane, .statics-wrapper {
+	background-image: linear-gradient(to bottom, rgba(40,42,54,0.92), rgba(40,42,54,0.92)), url('rocket-black.png');
+}
+.about-header { color: var(--primary); }
+
+/* --- form controls --- */
+.form-control,
+input, select, textarea,
+.input-group__text-field, .dropdown__select {
+	background-color: var(--panel);
+	color: var(--text);
+	border-color: var(--border);
+}
+.form-control:focus,
+.input-group__text-field:focus, .dropdown__select:focus { border-color: var(--primary); }
+.form-control::placeholder, input::placeholder, textarea::placeholder { color: var(--muted); }
+.input-group__label { color: var(--muted); }
+.dropdown__icon-chevron { fill: var(--muted); }
+select option { background-color: var(--panel); color: var(--text); }
+
+/* --- inline code (repo paths, etc.) --- */
+code {
+	background-color: #21222c;
+	color: var(--cyan);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	padding: 1px 5px;
+}
+
+/* --- scrollbars --- */
+* {
+	scrollbar-color: var(--border) var(--bg);
+}

@@ -48,10 +48,10 @@
 		<table class="table table-hover table-bordered">
 			<thead>
 				<tr>
-					<th bgcolor="#D0006F" style="color: #FFF"> Title </th>
-					<th bgcolor="#D0006F" style="color: #FFF"> Score </th>
-					<th bgcolor="#D0006F" style="color: #FFF"> Current Score Description </th>
-					<th bgcolor="#D0006F" style="color: #FFF"> Next Level Description </th>
+					<th bgcolor="#44475a" style="color: #f8f8f2"> Title </th>
+					<th bgcolor="#44475a" style="color: #f8f8f2"> Score </th>
+					<th bgcolor="#44475a" style="color: #f8f8f2"> Current Score Description </th>
+					<th bgcolor="#44475a" style="color: #f8f8f2"> Next Level Description </th>
 				</tr>
 			</thead>
 			<% capabilities.each_with_index do |capability, index| %>
@@ -76,12 +76,12 @@
 			datasets: [{
 				label: "Capability Scores",
 				data: <%= raw capability_values.to_json %>,
-				backgroundColor: ['rgba(54, 162, 235, 0.2)'], borderColor: '#000', borderWidth: 1,
-				pointBackgroundColor: "#fff", pointHoverBackgroundColor: "rgba(75,192,192,1)", pointRadius: 3
+				backgroundColor: ['rgba(189, 147, 249, 0.25)'], borderColor: '#bd93f9', borderWidth: 1,
+				pointBackgroundColor: "#bd93f9", pointHoverBackgroundColor: "rgba(75,192,192,1)", pointRadius: 3
 			},{
 				label: "Organizational Average",
 				data: <%= raw org_capability_values.to_json %>,
-				fill: false, backgroundColor: '#d0006f', borderColor: '#d0006f', borderWidth: 1, pointRadius: 0
+				fill: false, backgroundColor: '#8be9fd', borderColor: '#8be9fd', borderWidth: 1, pointRadius: 0
 			},{
 				type: 'line', label: 'Category Score',
 				data: <%= raw @assessment.expanded_dimension_values.to_json %>,
@@ -104,12 +104,12 @@
 			datasets: [{
 				label: "Average Category Score",
 				data: <%= raw @assessment.dimension_values.to_json %>,
-				backgroundColor: ['rgba(223,243,251,0.4)', 'rgba(191, 230, 247, 0.4)', 'rgba(128,206, 239, 0.4)', 'rgba(0, 151, 211, 0.4)', 'rgba(0, 117, 167, 0.4)'],
-				borderColor: '#000000', borderWidth: 1
+				backgroundColor: ['rgba(189,147,249,0.45)', 'rgba(80,250,123,0.45)', 'rgba(255,184,108,0.45)', 'rgba(255,121,198,0.45)', 'rgba(241,250,140,0.45)'],
+				borderColor: '#6272a4', borderWidth: 1
 			},{
 				label: "Organizational Average", type: 'line', fill: false,
 				data: <%= raw Assessment.org_dimension_values(@framework).to_json %>,
-				borderColor: '#d0006f', backgroundColor: '#d0006f', borderWidth: 1
+				borderColor: '#8be9fd', backgroundColor: '#8be9fd', borderWidth: 1
 			}]
 		},
 		options:{
