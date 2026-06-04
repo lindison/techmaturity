@@ -6,6 +6,9 @@ default: &default
   # production by default (see the production block).
   enable_data_management: true
   enable_repo_assessment: true
+  # LLM-powered repo analysis (needs OR_DELPHI_API_KEY). Falls back to the
+  # file-presence detectors when off or no key is set.
+  enable_ai_analysis: true
   feedback_slack:
     endpoint: "#endpoint"
     channel_name: "#channel_name"
@@ -24,6 +27,8 @@ test:
   enable_tag_modification: true
   # Disabled so the onboarding modal doesn't overlay/intercept clicks in system tests.
   enable_first_time_user_exp: false
+  # No external LLM calls during tests.
+  enable_ai_analysis: false
 
 production:
   enable_asset_creation: true

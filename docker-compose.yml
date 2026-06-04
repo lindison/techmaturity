@@ -10,6 +10,11 @@ services:
       - DB_USERNAME=postgres
       - DB_PASSWORD=password
       - DB_NAME=techmaturitydb
+    # Optional .env supplies secrets like OR_DELPHI_API_KEY (OpenRouter) for AI
+    # repo analysis. Not committed; the app degrades to file detectors without it.
+    env_file:
+      - path: .env
+        required: false
     depends_on: ["db"]
   db:
     image: postgres:11.7-alpine

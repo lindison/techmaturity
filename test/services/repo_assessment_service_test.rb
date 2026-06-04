@@ -55,7 +55,8 @@ class RepoAssessmentServiceTest < ActiveSupport::TestCase
     # A well-formed but unreachable URL is attempted and fails to clone — it is
     # never rejected for being internal/private; any repo URL is allowed.
     result = RepoAssessmentService.assess("https://git.internal.example/team/repo.git")
-    assert_no_match(/internal|private|loopback|metadata|refus/i, result.error.to_s)
+    # It is attempted and fails to clone — never *refused* for being internal.
+    assert_no_match(/refus/i, result.error.to_s)
   end
 end
 

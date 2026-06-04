@@ -65,13 +65,7 @@ class RepoAssessmentService
     return Result.new(source: @location, scores: {}, findings: [], error: error) if error
 
     @dir = dir
-    findings = detectors.filter_map do |slug, title, method|
-      result = send(method)
-      next unless result
-
-      level, note = result
-      Finding.new(key: slug, title: title, level: level, note: note)
-    end
+    findings = merge_findings(file_detector_findings, ai_findings)
     Result.new(source: @location, scores: findings.to_h { |f| [f.key, f.level] }, findings: findings, error: nil)
   ensure
     FileUtils.remove_entry(dir) if cleanup && dir && Dir.exist?(dir)
@@ -81,6 +75,31 @@ class RepoAssessmentService
 
   def detectors
     DETECTORS[@framework] || DETECTORS["tech"]
+  end
+
+  def file_detector_findings
+    detectors.filter_map do |slug, title, method|
+      result = send(method)
+      next unless result
+
+      level, note = result
+      Finding.new(key: slug, title: title, level: level, note: note)
+    end
+  end
+
+  # Deep LLM analysis against the framework's rubrics (when configured).
+  def ai_findings
+    return [] unless AiRepoAnalyzer.available?
+
+    framework = Framework.find_by(slug: @framework)
+    framework ? AiRepoAnalyzer.new(@dir, framework).analyze : []
+  end
+
+  # AI findings (deeper) take precedence over file-detector findings by slug.
+  def merge_findings(file, ai)
+    ai_by_slug = ai.index_by(&:key)
+    overridden = file.map { |f| ai_by_slug.delete(f.key) || f }
+    overridden + ai_by_slug.values
   end
 
   private
