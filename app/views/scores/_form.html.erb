@@ -1,56 +1,66 @@
 <% palette = ['#dff3fb', '#bfe6f7', '#80ceef', '#0097d3', '#0075a7'] %>
 <%= form_with url: product_scores_path(@product), method: :post, html: { id: 'score-form' } do %>
 
-	<%# Every framework's dimensions are flattened into one ordered list of steps,
-	    so a single walkthrough scores the asset against all maturity models. %>
+	<%# Every framework's dimensions are flattened, then grouped two-per-page so a
+	    single walkthrough scores the asset against all maturity models. %>
 	<% steps = @frameworks.flat_map { |fw| fw.dimensions.order(:position).includes(capabilities: :capability_levels).map { |d| [fw, d] } } %>
+	<% pages = steps.each_slice(2).to_a %>
 
 	<div class="progressive-form-wrapper" data-controller="score-form" data-action="click->score-form#toggleSelectable">
 
 		<div class="progress">
-			<% steps.each_with_index do |(_framework, dimension), i| %>
-				<div class="progress-bar" style="background-color: <%= dimension.color || palette[i % palette.size] %>"></div>
+			<% pages.each_with_index do |_page, i| %>
+				<div class="progress-bar" style="width: <%= (100.0 / pages.size).round(4) %>%; background-color: <%= palette[i % palette.size] %>"></div>
 			<% end %>
 		</div>
 
-		<% steps.each_with_index do |(framework, dimension), di| %>
+		<% pages.each_with_index do |page, pi| %>
 			<div class="progressive-form">
-				<div class="progressive-form-header">
-					<h3 class="progressive-form-title text-center">
-						<span class="progressive-form-framework" style="display:block; font-size:.6em; letter-spacing:.08em; text-transform:uppercase; opacity:.55"><%= framework.name %></span>
-						<strong><%= dimension.name %></strong>
-					</h3>
-					<div class="pull-right"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
+				<div class="progressive-form-pagenav">
+					<div><% if pi.positive? %><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button><% end %></div>
+					<div class="progressive-form-pagenum">Page <%= pi + 1 %> of <%= pages.size %></div>
+					<div><% if pi < pages.size - 1 %><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button><% end %></div>
 				</div>
-				<div style="clear:both; height:7px"></div>
-				<div class="progressive-form-content">
-					<table class="table table-hover table-bordered">
-						<tr>
-							<th bgcolor="bbc3c9" class="progressive-form-meta">Title</th>
-							<% (1..4).each do |v| %>
-								<th bgcolor="<%= palette[(v - 1) % palette.size] %>" class="progressive-form-level">Level <%= v %></th>
-							<% end %>
-							<th bgcolor="#fbfbf1" class="progressive-form-meta">Min Score</th>
-						</tr>
-						<% dimension.capabilities.order(:position).each do |capability| %>
-							<tr>
-								<td bgcolor="#dde1e4" style="border:1px solid #bbc3c9"><%= capability.name %></td>
-								<% (1..4).each do |v| %>
-									<td class="selectable">
-										<label for="cap_<%= capability.id %>_<%= v %>"><%= capability.level(v)&.formatted_description&.html_safe %></label>
-										<%= radio_button_tag "score[responses][#{capability.id}]", v, @prefill[capability.id] == v, id: "cap_#{capability.id}_#{v}" %>
-									</td>
+
+				<% page.each do |(framework, dimension)| %>
+					<div class="progressive-form-section">
+						<div class="progressive-form-header">
+							<h3 class="progressive-form-title text-center">
+								<span class="progressive-form-framework" style="display:block; font-size:.6em; letter-spacing:.08em; text-transform:uppercase; opacity:.55"><%= framework.name %></span>
+								<strong><%= dimension.name %></strong>
+							</h3>
+						</div>
+						<div class="progressive-form-content">
+							<table class="table table-hover table-bordered">
+								<tr>
+									<th bgcolor="bbc3c9" class="progressive-form-meta">Title</th>
+									<% (1..4).each do |v| %>
+										<th bgcolor="<%= palette[(v - 1) % palette.size] %>" class="progressive-form-level">Level <%= v %></th>
+									<% end %>
+									<th bgcolor="#fbfbf1" class="progressive-form-meta">Min Score</th>
+								</tr>
+								<% dimension.capabilities.order(:position).each do |capability| %>
+									<tr>
+										<td bgcolor="#dde1e4" style="border:1px solid #bbc3c9"><%= capability.name %></td>
+										<% (1..4).each do |v| %>
+											<td class="selectable">
+												<label for="cap_<%= capability.id %>_<%= v %>"><%= capability.level(v)&.formatted_description&.html_safe %></label>
+												<%= radio_button_tag "score[responses][#{capability.id}]", v, @prefill[capability.id] == v, id: "cap_#{capability.id}_#{v}" %>
+											</td>
+										<% end %>
+										<td><%= capability.min_level %></td>
+									</tr>
 								<% end %>
-								<td><%= capability.min_level %></td>
-							</tr>
-						<% end %>
-					</table>
-				</div>
+							</table>
+						</div>
+					</div>
+				<% end %>
+
 				<div class="progressive-form-footer">
-					<% if di.positive? %>
+					<% if pi.positive? %>
 						<div class="pull-left"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 					<% end %>
-					<% if di < steps.size - 1 %>
+					<% if pi < pages.size - 1 %>
 						<div class="pull-right"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 					<% end %>
 				</div>

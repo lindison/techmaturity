@@ -296,6 +296,23 @@ a .stats-item:hover .stats-title{
 	background-image:none;
 }
 
+/* Two dimensions per page, stacked with breathing room between them. */
+.progressive-form-section{
+	margin-bottom: 26px;
+}
+
+.progressive-form-pagenav{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.progressive-form-pagenum{
+	opacity: .5;
+	font-size: 13px;
+}
+
 .progressive-form-header{
 	display: flex;
 }

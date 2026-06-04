@@ -9,13 +9,19 @@ class ScoreFormTest < ApplicationSystemTestCase
     visit new_product_score_path(@product)
   end
 
-  test "shows one step at a time and advances to the next dimension" do
+  test "shows two dimensions per page and advances to the next pair" do
     assert_selector ".progressive-form", visible: true, count: 1
-    assert_selector ".progressive-form-title", text: "Code", visible: true # dimension 1
+    within first(".progressive-form", visible: true) do
+      assert_selector ".progressive-form-title strong", text: "Code"            # dimension 1
+      assert_selector ".progressive-form-title strong", text: "Build and Test"  # dimension 2 (same page)
+    end
 
     first(:button, "Next", visible: true).click
 
-    assert_selector ".progressive-form-title", text: "Build and Test", visible: true # dimension 2
+    within first(".progressive-form", visible: true) do
+      assert_selector ".progressive-form-title strong", text: "Release" # next pair
+      assert_selector ".progressive-form-title strong", text: "Operate"
+    end
   end
 
   test "selecting a level checks that capability's radio" do
