@@ -1,0 +1,220 @@
+slug: sre
+name: SRE Maturity
+description: Site Reliability Engineering maturity, mapped to Google SRE — SLOs & error budgets, observability, incident response, learning, and toil reduction.
+position: 1
+dimensions:
+  - slug: slo
+    name: SLOs & Error Budgets
+    capabilities:
+      - slug: sli
+        name: Service Level Indicators
+        min_level: 3
+        levels:
+          - No SLIs; reliability is judged by gut feel or raw host metrics.
+          - A few availability/latency SLIs exist for some services, measured ad hoc.
+          - Meaningful SLIs (availability, latency, quality) are continuously measured for key services from the user's perspective.
+          - SLIs cover all critical user journeys, are standardized, and are derived from real user experience at the edge.
+      - slug: slo
+        name: Service Level Objectives
+        min_level: 3
+        levels:
+          - No SLOs.
+          - Aspirational targets exist but are not measured against SLIs.
+          - SLOs are set against SLIs for key services and tracked over rolling windows.
+          - SLOs are agreed with stakeholders, reviewed regularly, and reflect business expectations for every critical service.
+      - slug: error_budget
+        name: Error Budgets
+        min_level: 3
+        levels:
+          - No concept of error budgets.
+          - Error budgets are defined but not tracked or used.
+          - Error budgets are tracked against SLOs and their burn is visible to the team.
+          - Burn-rate alerts exist and budgets actively inform prioritization.
+      - slug: error_budget_policy
+        name: Error-Budget Policy
+        min_level: 3
+        levels:
+          - No policy; reliability-vs-features is decided ad hoc.
+          - An informal expectation to slow down when unreliable.
+          - A written error-budget policy exists and is mostly followed.
+          - The policy is enforced — budget exhaustion gates releases and redirects work to reliability until restored.
+      - slug: slo_review
+        name: SLO Reporting & Review
+        min_level: 3
+        levels:
+          - SLO performance is not reported.
+          - Occasional manual reporting.
+          - SLOs are on dashboards and reviewed in regular operational reviews.
+          - SLOs are reviewed with stakeholders on a cadence and adjusted as the service and expectations evolve.
+  - slug: observability
+    name: Monitoring & Observability
+    capabilities:
+      - slug: golden_signals
+        name: Four Golden Signals
+        min_level: 3
+        levels:
+          - Little or no monitoring beyond host up/down.
+          - Some metrics are collected; coverage is inconsistent.
+          - Latency, traffic, errors, and saturation are monitored for key services.
+          - The golden signals are instrumented consistently across all services.
+      - slug: dashboards
+        name: Dashboards
+        min_level: 3
+        levels:
+          - No service dashboards.
+          - Ad hoc dashboards maintained by individuals.
+          - Per-service dashboards show health and SLOs and are used during incidents.
+          - Standardized, templated dashboards exist for every service and link to runbooks.
+      - slug: alerting
+        name: Symptom-based Alerting
+        min_level: 3
+        levels:
+          - No alerting, or noisy cause-based alerts.
+          - Threshold alerts exist but cause alert fatigue.
+          - Alerts are symptom/SLO-based and mostly actionable.
+          - Alerting is based on SLO error-budget burn, is low-noise, and every alert is actionable with a runbook.
+      - slug: logging
+        name: Logging
+        min_level: 3
+        levels:
+          - Logs live only on hosts, accessed by SSH.
+          - Some centralized logging.
+          - Centralized, searchable, structured logging for key services.
+          - Structured logging with correlation IDs across services and clear retention policies.
+      - slug: tracing
+        name: Distributed Tracing
+        min_level: 3
+        levels:
+          - No tracing.
+          - Tracing in a few services.
+          - Distributed tracing across the main request paths.
+          - End-to-end tracing across services with sampling, correlated with metrics and logs.
+  - slug: incident
+    name: Incident Response
+    capabilities:
+      - slug: oncall
+        name: On-Call
+        min_level: 3
+        levels:
+          - No on-call; problems are found by users.
+          - Informal, heroic on-call by a few individuals.
+          - A sustainable on-call rotation with defined hours and handoffs.
+          - Humane on-call with limits/compensation, primary and secondary, and follow-the-sun where needed.
+      - slug: escalation
+        name: Escalation & Routing
+        min_level: 3
+        levels:
+          - No defined escalation.
+          - Escalation relies on tribal knowledge.
+          - Documented escalation paths and paging routes.
+          - Automated routing/escalation with clear ownership and acknowledgement SLAs.
+      - slug: incident_command
+        name: Incident Command
+        min_level: 3
+        levels:
+          - Ad hoc, chaotic response.
+          - Someone usually coordinates but roles are unclear.
+          - An incident-command process with defined roles for major incidents.
+          - Incident command is practiced and second-nature, with scribes, comms leads, and clean handoffs.
+      - slug: comms
+        name: Communication & Status
+        min_level: 3
+        levels:
+          - No incident communication.
+          - Communication happens ad hoc in chat.
+          - Defined channels and stakeholder/status updates during incidents.
+          - A status page plus templated stakeholder comms on a cadence; customers are informed proactively.
+      - slug: severity
+        name: Severity Classification
+        min_level: 3
+        levels:
+          - No severity levels.
+          - Severity is assigned inconsistently.
+          - A severity scale drives response expectations.
+          - Severity is well-defined, drives automation/escalation, and is applied consistently.
+      - slug: mttr
+        name: MTTA / MTTR Tracking
+        min_level: 3
+        levels:
+          - Time-to-detect and time-to-resolve are not measured.
+          - Tracked occasionally.
+          - MTTA/MTTR are tracked for incidents and trended.
+          - Detection and response times are tracked, targeted, and actively improved.
+  - slug: learning
+    name: Learning & Postmortems
+    capabilities:
+      - slug: postmortem
+        name: Blameless Postmortems
+        min_level: 3
+        levels:
+          - No postmortems.
+          - Postmortems for big incidents, sometimes blameful.
+          - Blameless postmortems for significant incidents with timeline and contributing causes.
+          - Blameless postmortems are routine, shared widely, and a learning norm.
+      - slug: action_items
+        name: Action Tracking
+        min_level: 3
+        levels:
+          - No follow-up actions.
+          - Actions are noted but rarely completed.
+          - Action items are tracked to completion with owners.
+          - Action items are prioritized against other work and verified to prevent recurrence.
+      - slug: outage_tracking
+        name: Outage Tracking
+        min_level: 3
+        levels:
+          - Outages are not recorded.
+          - Some inconsistent records.
+          - Outages are logged with impact and causes, and patterns are reviewed.
+          - Outage data drives systemic reliability investments.
+      - slug: reliability_testing
+        name: Testing for Reliability
+        min_level: 3
+        levels:
+          - No reliability or failure testing.
+          - Occasional manual failover tests.
+          - Regular failure/DR testing of key paths.
+          - Continuous resilience testing (e.g. chaos engineering) in production-like environments.
+  - slug: toil
+    name: Toil & Reliability Engineering
+    capabilities:
+      - slug: toil_measurement
+        name: Toil Measurement
+        min_level: 3
+        levels:
+          - Toil is not recognized or measured.
+          - Toil is acknowledged anecdotally.
+          - Toil is measured and a cap/budget is set for it.
+          - Toil is tracked, capped, and systematically driven down.
+      - slug: automation
+        name: Operational Automation
+        min_level: 3
+        levels:
+          - Operations are manual.
+          - Some scripts, run by hand.
+          - Common operational tasks are automated and self-service.
+          - Operations are automated end-to-end; manual steps are the exception.
+      - slug: release_engineering
+        name: Release Engineering
+        min_level: 3
+        levels:
+          - Manual, risky releases.
+          - Semi-automated releases with manual gates.
+          - Automated, repeatable releases (CI/CD) with rollbacks.
+          - Progressive delivery (canary, automated rollback) gated by SLOs/error budgets.
+      - slug: load_management
+        name: Capacity & Load Management
+        min_level: 3
+        levels:
+          - No capacity planning; outages from overload.
+          - Reactive capacity changes.
+          - Capacity is planned from demand forecasts, with autoscaling and graceful degradation for key services.
+          - Capacity is modeled and automated, with load shedding, overload protection, and cascading-failure prevention.
+      - slug: dr
+        name: Disaster Recovery
+        min_level: 3
+        levels:
+          - No DR plan or backups.
+          - Backups exist but recovery is untested.
+          - A DR plan with tested backups and defined RTO/RPO.
+          - DR is automated and regularly exercised, meeting RTO/RPO targets.

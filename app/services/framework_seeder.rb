@@ -8,6 +8,40 @@ class FrameworkSeeder
 
   def self.seed_all!
     seed_tech!
+    seed_sre!
+  end
+
+  # SRE Maturity, defined in db/frameworks/sre.yml (nested format).
+  def self.seed_sre!
+    seed_definition!(YAML.safe_load_file(Rails.root.join("db/frameworks/sre.yml")))
+  end
+
+  # Seeds a framework from a nested definition:
+  #   { "slug","name","description","position",
+  #     "dimensions" => [ { "slug","name",
+  #       "capabilities" => [ { "slug","name","min_level","levels" => [l1,l2,l3,l4] } ] } ] }
+  def self.seed_definition!(definition)
+    Framework.transaction do
+      framework = Framework.find_or_initialize_by(slug: definition["slug"])
+      framework.update!(name: definition["name"], description: definition["description"],
+                        position: definition["position"] || 0)
+
+      definition.fetch("dimensions").each_with_index do |dim_def, di|
+        dimension = framework.dimensions.find_or_initialize_by(slug: dim_def["slug"])
+        dimension.update!(name: dim_def["name"], position: di)
+
+        dim_def.fetch("capabilities").each_with_index do |cap_def, ci|
+          capability = dimension.capabilities.find_or_initialize_by(slug: cap_def["slug"])
+          capability.update!(name: cap_def["name"], position: ci, min_level: cap_def["min_level"])
+
+          Array(cap_def["levels"]).each_with_index do |description, li|
+            level = capability.capability_levels.find_or_initialize_by(value: li + 1)
+            level.update!(description: description, formatted_description: description)
+          end
+        end
+      end
+      framework
+    end
   end
 
   # The original Tech Maturity model, parsed from the legacy YAML constants.
