@@ -21,12 +21,6 @@ a3_3: 'Actively builds and maintains unit tests, functional tests, critical path
 a3_4: 'Actively builds and maintains unit tests, functional tests, critical path tests, performance tests with all of them successfully passing for <b>positive and negative flows</b> maintaining <b>100% critical path coverage</b>' 
 a3_min: 3
 
-a4: 'Logging and Telemetry' 
-a4_1: '<b>Default</b> or customized logging and <b>no telemetry</b>' 
-a4_2: '<b>Rudimentary</b> logging and telemetry in place' 
-a4_3: "<b>Adherence to established logging & telemetry standards</b> Suitable information available in logs and telemetry for <b>troubleshooting common issues</b>" 
-a4_4: "Adherence to established logging & telemetry standards <b>Most</b> issues can be diagnosed through logs and telemetry" 
-a4_min: 2
 
 a5: 'Backward / Forward Compatibility' 
 a5_1: '<b>Breaking changes</b> (i.e. tested locally)' 
@@ -35,12 +29,6 @@ a5_3: 'Coding practices supports <b>forward</b> compatibility'
 a5_4: 'Coding practices support <b>backward and forward</b> compatibility' 
 a5_min: 2
 
-a6: 'Monitoring and Alerting' 
-a6_1: 'Logs have enough data to set up monitoring and alerts on' 
-a6_2: '<b>Some monitoring</b> and <b>some alerting</b> is prioritized in the work queue' 
-a6_3: "<b>Prioritization</b> of monitoring and alerting as part of the <b>acceptance criteria for all work</b> Access to <b>log archives</b> and telemetry is available for troubleshooting" 
-a6_4: "Prioritization of monitoring, alerting, and <b>validation of triggers (e.g. SLAs)</b> as part of the acceptance criteria for all work Logs are <b>indexed</b> and telemetry is <b>readily</b> available for troubleshooting" 
-a6_min: 2
 
 a7: 'Quality Engineering Model' 
 a7_1: 'Contributors have separate roles (i.e. only code or test)' 
@@ -230,40 +218,10 @@ d2_3: 'Contributors have created a triage runbook, and it is <b>integrated into 
 d2_4: 'Contributors have created a <b>useful</b> triage runbook that is <b>actively maintained</b> and integrated into the alerting infrastructure for easy reference' 
 d2_min: ~
 
-d3: 'Monitoring and Alerting' 
-d3_1: 'SLAs haven''t been defined or if SLAs are monitored and alerts are set up, they mostly just encompass the standard cases' 
-d3_2: 'SLAs are monitored and <b>some alerts</b> are sent when thresholds are not met, healthchecks are monitored, and alerts are configured for <b>many standard error conditions</b>' 
-d3_3: "<b>SLAs in staging and production are consistently being met and alerted on</b> when thresholds are not met, and <b>healthchecks are monitored</b> Alerts are configured for a <b>majority of error conditions</b>" 
-d3_4: "SLAs in staging and production are consistently being met, and a <b>business disruption alert</b> is escalated when thresholds are not met or a healthcheck fails <b>Non-standard HTTP responses</b> trigger an alert Alerts are triggered for main use cases when <b>expected results are not met</b> (i.e. lower than normal conversion rate)" 
-d3_min: 2
 
-d4: 'On-Call Strategy' 
-d4_1: 'Others know how to escalate to the team' 
-d4_2: 'Contributors follow a <b>defined on-call strategy</b>' 
-d4_3: 'On-call strategy is efficient as evidenced by consistently low MTTD and MTTR but <b>sometimes requires more than one party to resolve</b>' 
-d4_4: '<b>Contributor who is on-call is usually the resolver for all issues</b> within their product as evidenced by a consistently low MTTD and MTTR' 
-d4_min: 2
 
-d5: 'Risk Management' 
-d5_1: 'Contributors do not fully own risk management or mitigation of the product. Disaster recovery is normally defined and/or managed by someone else who has full ownership' 
-d5_2: 'Contributors think about disaster recovery plans while the code is built and released, but <b>requires the involvement from many other parties</b>' 
-d5_3: 'There is an <b>established disaster recovery plan</b> (DRP) and <b>business continuity program </b>(BCP)' 
-d5_4: 'There is an established disaster recovery plan (DRP) and business continuity program (BCP) which has been <b>tested within the past 6 months</b>' 
-d5_min: 2
 
-d6: 'Synthetic Monitoring' 
-d6_1: 'No synthetic monitoring is in place' 
-d6_2: 'Synthetic monitoring is used in staging and production with <b>some alerting</b>' 
-d6_3: 'Synthetic monitoring is used in staging and production for <b>major use cases</b>, with escalation <b>alerts for failures</b>' 
-d6_4: 'Synthetic monitoring is used in staging and production for <b>both positive and negative use cases</b>, with escalation alerts for failures' 
-d6_min: 2
 
-d7: 'Log Management Strategy' 
-d7_1: 'All logs, all the time!' 
-d7_2: 'Log rotation is based off a <b>default template</b>' 
-d7_3: "Log rotation takes into account <b>available disk space</b> Logs are <b>archived for retention</b>" 
-d7_4: "There is an <b>effectively defined log rotation strategy</b> including timing of business activities like periods of high demand Logs are retained according to <b>business and legal requirements</b>" 
-d7_min: 2
 
 d8: 'Business Dashboard' 
 d8_1: 'Some business metrics are tracked in a dashboard, and / or some metrics are still mined manually, but these may not be visible or accessible to all contributors' 

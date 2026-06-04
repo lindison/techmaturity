@@ -16,7 +16,7 @@ class RepoAssessmentServiceTest < ActiveSupport::TestCase
   test "leaves org/process capabilities unscored (not inferable from source)" do
     result = RepoAssessmentService.assess(Rails.root.to_s)
 
-    refute result.scores.key?("d4"), "on-call strategy"
+    refute result.scores.key?("d1"), "devops practice"
     refute result.scores.key?("e1"), "continuous process improvement"
   end
 

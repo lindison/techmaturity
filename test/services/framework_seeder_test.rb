@@ -7,8 +7,9 @@ class FrameworkSeederTest < ActiveSupport::TestCase
     assert_equal "tech", framework.slug
     assert_equal 5, framework.dimensions.count
     assert_equal %w[Code], framework.dimensions.order(:position).limit(1).pluck(:name)
-    assert_equal 42, framework.capabilities.count
-    assert_equal 168, CapabilityLevel.joins(capability: :dimension)
+    # 35 capabilities after trimming 7 that duplicate the SRE model (a4, a6, d3-d7).
+    assert_equal 35, framework.capabilities.count
+    assert_equal 140, CapabilityLevel.joins(capability: :dimension)
                                      .where(dimensions: { framework_id: framework.id }).count
   end
 

@@ -20,7 +20,6 @@ class RepoAssessmentService
   DETECTORS = {
     "tech" => [
       ["a3",  "Test Suite",                        :detect_a3],
-      ["a4",  "Logging and Telemetry",             :detect_a4],
       ["a12", "Behavior Driven Development (BDD)",  :detect_a12],
       ["b2",  "Code Quality",                       :detect_b2],
       ["b3",  "Security Code Analysis",             :detect_b3],
@@ -242,11 +241,6 @@ class RepoAssessmentService
   def detect_c3 # Feature Flags
     %w[launchdarkly flipper unleash flagsmith split.io ld-relay].any? { |lib| deps.include?(lib) } ?
       [3, "Feature-flag library in dependencies"] : nil
-  end
-
-  def detect_a4 # Logging and Telemetry
-    %w[lograge winston log4j logback structlog zap serilog opentelemetry datadog sentry].any? { |lib| deps.include?(lib) } ?
-      [3, "Logging/telemetry library in dependencies"] : nil
   end
 
   def detect_d2 # Runbook Adoption

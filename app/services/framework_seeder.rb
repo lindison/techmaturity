@@ -26,13 +26,17 @@ class FrameworkSeeder
       framework.update!(name: definition["name"], description: definition["description"],
                         position: definition["position"] || 0)
 
+      dim_slugs = []
+      cap_slugs = []
       definition.fetch("dimensions").each_with_index do |dim_def, di|
         dimension = framework.dimensions.find_or_initialize_by(slug: dim_def["slug"])
         dimension.update!(name: dim_def["name"], position: di)
+        dim_slugs << dim_def["slug"]
 
         dim_def.fetch("capabilities").each_with_index do |cap_def, ci|
           capability = dimension.capabilities.find_or_initialize_by(slug: cap_def["slug"])
           capability.update!(name: cap_def["name"], position: ci, min_level: cap_def["min_level"])
+          cap_slugs << cap_def["slug"]
 
           Array(cap_def["levels"]).each_with_index do |description, li|
             level = capability.capability_levels.find_or_initialize_by(value: li + 1)
@@ -40,6 +44,7 @@ class FrameworkSeeder
           end
         end
       end
+      prune_orphans!(framework, dim_slugs, cap_slugs)
       framework
     end
   end
@@ -65,14 +70,18 @@ class FrameworkSeeder
       framework = Framework.find_or_initialize_by(slug: slug)
       framework.update!(name: name, description: description, position: position)
 
+      dim_slugs = []
+      cap_slugs = []
       dimension_keys(plain).each_with_index do |dkey, di|
         dimension = framework.dimensions.find_or_initialize_by(slug: dkey)
         dimension.update!(name: plain[dkey], position: di)
+        dim_slugs << dkey
 
         capability_keys(plain, dkey).each_with_index do |ckey, ci|
           min = plain["#{ckey}_min"]
           capability = dimension.capabilities.find_or_initialize_by(slug: ckey)
           capability.update!(name: plain[ckey], position: ci, min_level: (min if min.is_a?(Integer)))
+          cap_slugs << ckey
 
           (1..4).each do |value|
             level = capability.capability_levels.find_or_initialize_by(value: value)
@@ -83,8 +92,21 @@ class FrameworkSeeder
           end
         end
       end
+      prune_orphans!(framework, dim_slugs, cap_slugs)
       framework
     end
+  end
+
+  # Remove capabilities/dimensions that are no longer in the definition (e.g. when
+  # a capability is dropped from the YAML), along with their levels and any
+  # assessment responses (cascade via dependent: :destroy). Keeps the DB an exact
+  # mirror of the source-of-truth files, so a re-seed reconciles trims cleanly.
+  def self.prune_orphans!(framework, dimension_slugs, capability_slugs)
+    Capability.joins(:dimension)
+              .where(dimensions: { framework_id: framework.id })
+              .where.not(slug: capability_slugs)
+              .destroy_all
+    framework.dimensions.where.not(slug: dimension_slugs).destroy_all
   end
 
   def self.load_yaml(file)
