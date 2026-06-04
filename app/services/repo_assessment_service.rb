@@ -92,7 +92,7 @@ class RepoAssessmentService
     if @location.empty?
       [nil, false, "No repository given"]
     elsif @location.match?(GIT_URL)
-      return [nil, false, "Refusing to clone an internal/private host"] if internal_host?(@location)
+      return [nil, false, "Refusing to clone a loopback or cloud-metadata address"] if blocked_host?(@location)
 
       clone_repo
     elsif File.directory?(@location)
@@ -102,23 +102,25 @@ class RepoAssessmentService
     end
   end
 
-  # SSRF guard: reject URLs whose host resolves to loopback, link-local
-  # (incl. the cloud metadata IP), or private ranges.
-  PRIVATE_RANGES = [
-    "127.0.0.0/8", "0.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
-    "169.254.0.0/16", "::1/128", "fc00::/7", "fe80::/10"
+  # SSRF guard. Blocks only what is never a legitimate git host and is the real
+  # danger: loopback and link-local (incl. the cloud metadata IP 169.254.169.254).
+  # Private/internal ranges (10/172.16/192.168) are intentionally ALLOWED so the
+  # tool can assess internal/enterprise git servers — the whole feature is off in
+  # production by default (CONFIGS[:enable_repo_assessment]).
+  BLOCKED_RANGES = [
+    "127.0.0.0/8", "::1/128",      # loopback
+    "169.254.0.0/16", "fe80::/10", # link-local (cloud metadata lives here)
+    "0.0.0.0/8"
   ].map { |r| IPAddr.new(r) }.freeze
 
-  def internal_host?(location)
+  def blocked_host?(location)
     host = git_host(location)
-    return true if host.nil? || host.empty?
+    return false if host.nil? || host.empty? # let git fail on a malformed URL
 
-    addresses = Resolv.getaddresses(host)
-    return true if addresses.empty?
-
-    addresses.any? { |ip| ip_internal?(ip) }
+    # Unresolvable hosts resolve to [] -> not blocked; git will fail if unreachable.
+    Resolv.getaddresses(host).any? { |ip| ip_blocked?(ip) }
   rescue StandardError
-    true # fail closed
+    false # don't fail closed — a DNS hiccup shouldn't block a legitimate repo
   end
 
   def git_host(location)
@@ -129,11 +131,11 @@ class RepoAssessmentService
     end
   end
 
-  def ip_internal?(ip)
+  def ip_blocked?(ip)
     addr = IPAddr.new(ip)
-    PRIVATE_RANGES.any? { |range| range.include?(addr) }
+    BLOCKED_RANGES.any? { |range| range.include?(addr) }
   rescue IPAddr::Error
-    true
+    false
   end
 
   def clone_repo

@@ -51,18 +51,27 @@ class RepoAssessmentServiceTest < ActiveSupport::TestCase
     end
   end
 
-  test "refuses to clone internal/private hosts (SSRF guard)" do
+  test "refuses loopback and cloud-metadata hosts (SSRF guard)" do
     [
       "http://127.0.0.1/x.git",
       "https://localhost/repo.git",
-      "http://169.254.169.254/latest/meta-data/", # cloud metadata
-      "http://10.0.0.5/r.git",
-      "git@192.168.1.10:team/repo.git"
+      "http://169.254.169.254/latest/meta-data/" # cloud metadata
     ].each do |url|
       result = RepoAssessmentService.assess(url)
       assert result.error, "expected #{url} to be rejected"
-      assert_empty result.scores
+      assert_match(/loopback|metadata/i, result.error)
     end
+  end
+
+  test "does not block internal/private git hosts (so internal repos can be assessed)" do
+    # The SSRF guard must NOT flag RFC1918 hosts — assessing internal/enterprise
+    # git servers is the point. (We check the guard, not a real clone.)
+    service = RepoAssessmentService.new("https://git.internal.example/team/repo.git")
+    %w[10.0.0.5 172.16.4.4 192.168.1.10].each do |ip|
+      assert_not service.send(:ip_blocked?, ip), "#{ip} should be allowed"
+    end
+    assert service.send(:ip_blocked?, "169.254.169.254"), "metadata IP should be blocked"
+    assert service.send(:ip_blocked?, "127.0.0.1"), "loopback should be blocked"
   end
 end
 
