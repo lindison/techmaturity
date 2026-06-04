@@ -27,13 +27,21 @@ class ScoresControllerTest < ActionDispatch::IntegrationTest
     assert_equal 3, @product.assessments.latest.first.value_for(cap)
   end
 
-  test "should ignore capabilities outside the product's framework" do
-    other = Framework.create!(name: "Other", slug: "other")
-    foreign_cap = other.dimensions.create!(name: "X", slug: "x").capabilities.create!(name: "Y", slug: "y")
+  test "routes each response to its own framework's assessment (one process, many models)" do
+    tech_cap = Framework.find_by(slug: "tech").capabilities.first
+    sre_cap  = Framework.find_by(slug: "sre").capabilities.first
 
-    post product_scores_url(@product), params: { score: { responses: { foreign_cap.id.to_s => "4" } } }
+    assert_difference -> { @product.assessments.count }, 2 do
+      post product_scores_url(@product), params: { score: { responses: {
+        tech_cap.id.to_s => "3", sre_cap.id.to_s => "4"
+      } } }
+    end
 
-    assert_nil @product.assessments.latest.first.value_for(foreign_cap)
+    tech = @product.assessments.latest.find_by(framework: tech_cap.dimension.framework)
+    sre  = @product.assessments.latest.find_by(framework: sre_cap.dimension.framework)
+    assert_equal 3, tech.value_for(tech_cap)
+    assert_equal 4, sre.value_for(sre_cap)
+    assert_nil tech.value_for(sre_cap), "a framework's assessment only holds its own capabilities"
   end
 
   test "should show an assessment" do

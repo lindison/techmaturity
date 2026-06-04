@@ -28,6 +28,11 @@ class ScoreFormTest < ApplicationSystemTestCase
   end
 
   test "submitting the form creates an assessment for the product" do
+    # Answer one capability so the submit has something to save (an assessment is
+    # created per framework that received an answer).
+    capability = @framework.capabilities.first
+    find(:xpath, "//input[@id='cap_#{capability.id}_2']/ancestor::td[contains(@class,'selectable')]").click
+
     assert_difference -> { @product.assessments.count }, 1 do
       find("#form-submitter").click
       assert_current_path product_path(@product) # redirect on success

@@ -1,19 +1,25 @@
 <% palette = ['#dff3fb', '#bfe6f7', '#80ceef', '#0097d3', '#0075a7'] %>
 <%= form_with url: product_scores_path(@product), method: :post, html: { id: 'score-form' } do %>
 
+	<%# Every framework's dimensions are flattened into one ordered list of steps,
+	    so a single walkthrough scores the asset against all maturity models. %>
+	<% steps = @frameworks.flat_map { |fw| fw.dimensions.order(:position).includes(capabilities: :capability_levels).map { |d| [fw, d] } } %>
+
 	<div class="progressive-form-wrapper" data-controller="score-form" data-action="click->score-form#toggleSelectable">
 
 		<div class="progress">
-			<% @framework.dimensions.order(:position).each_with_index do |dimension, i| %>
+			<% steps.each_with_index do |(_framework, dimension), i| %>
 				<div class="progress-bar" style="background-color: <%= dimension.color || palette[i % palette.size] %>"></div>
 			<% end %>
 		</div>
 
-		<% dimensions = @framework.dimensions.order(:position).includes(capabilities: :capability_levels).to_a %>
-		<% dimensions.each_with_index do |dimension, di| %>
+		<% steps.each_with_index do |(framework, dimension), di| %>
 			<div class="progressive-form">
 				<div class="progressive-form-header">
-					<h3 class="progressive-form-title text-center"><strong><%= dimension.name %></strong></h3>
+					<h3 class="progressive-form-title text-center">
+						<span class="progressive-form-framework" style="display:block; font-size:.6em; letter-spacing:.08em; text-transform:uppercase; opacity:.55"><%= framework.name %></span>
+						<strong><%= dimension.name %></strong>
+					</h3>
 					<div class="pull-right"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 				</div>
 				<div style="clear:both; height:7px"></div>
@@ -32,7 +38,7 @@
 								<% (1..4).each do |v| %>
 									<td class="selectable">
 										<label for="cap_<%= capability.id %>_<%= v %>"><%= capability.level(v)&.formatted_description&.html_safe %></label>
-										<%= radio_button_tag "score[responses][#{capability.id}]", v, @assessment.value_for(capability) == v, id: "cap_#{capability.id}_#{v}" %>
+										<%= radio_button_tag "score[responses][#{capability.id}]", v, @prefill[capability.id] == v, id: "cap_#{capability.id}_#{v}" %>
 									</td>
 								<% end %>
 								<td><%= capability.min_level %></td>
@@ -44,7 +50,7 @@
 					<% if di.positive? %>
 						<div class="pull-left"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#back"> Back </button></div>
 					<% end %>
-					<% if di < dimensions.size - 1 %>
+					<% if di < steps.size - 1 %>
 						<div class="pull-right"><button type="button" class="button-aux button-aux--minor" data-action="click->score-form#next"> Next </button></div>
 					<% end %>
 				</div>

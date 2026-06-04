@@ -1,6 +1,6 @@
 
 <div class="page__content subheader">
-	<h1 class="pull-left"><%= (@product.is_assessed?) ? "Updating" : "Adding" %> <%= @framework.name %> Score for <%= @product.name %></h1>
+	<h1 class="pull-left"><%= (@product.is_assessed?) ? "Updating" : "Adding" %> Maturity Score for <%= @product.name %></h1>
 	<%# The HTML5 form= attribute submits the score form (below) natively, so no
 	    JS is needed for this header button. %>
 	<button id="form-submitter" type="submit" form="score-form" class="button button--cta pull-right"> Save Score </button>
@@ -10,28 +10,31 @@
 <% if CONFIGS[:enable_repo_assessment] %>
 <div class="page__content main-content">
 	<%# Point the model at a repository to auto-fill the capabilities that leave
-	    detectable signals in source. The rest are left for the assessor. %>
+	    detectable signals in source (scored against every maturity model). %>
 	<%= form_with url: new_product_score_path(@product), method: :get do %>
 		<%= text_field_tag :repo, params[:repo], placeholder: 'Local path or git URL (https/ssh)',
 			class: 'form-control', style: 'max-width:420px; display:inline-block; margin-right:8px' %>
 		<%= submit_tag 'Assess from repository', class: 'button button--cta' %>
 	<% end %>
 
-	<% if @repo_assessment %>
-		<% if @repo_assessment.error %>
-			<div class="alert alert-danger"><%= @repo_assessment.error %></div>
-		<% else %>
-			<div class="alert alert-success">
-				<p>Pre-filled <strong><%= @repo_assessment.findings.size %></strong> of <%= @framework.capabilities.count %> capabilities from
-					<code><%= @repo_assessment.source %></code>. Review them, complete the rest, then Save.</p>
+	<% if @repo_error %>
+		<div class="alert alert-danger"><%= @repo_error %></div>
+	<% elsif @repo_assessments&.any? %>
+		<% total = @repo_assessments.sum { |_framework, result| result.findings.size } %>
+		<div class="alert alert-success">
+			<p>Pre-filled <strong><%= total %></strong> capabilities across <%= @repo_assessments.size %> maturity model<%= 's' unless @repo_assessments.size == 1 %> from
+				<code><%= @repo_source %></code>. Review them, complete the rest, then Save.</p>
+			<% @repo_assessments.each do |framework, result| %>
+				<% next if result.findings.empty? %>
+				<p style="margin:.6em 0 .2em"><strong><%= framework.name %></strong> — <%= result.findings.size %> detected</p>
 				<ul>
-					<% @repo_assessment.findings.each do |f| %>
+					<% result.findings.each do |f| %>
 						<li><strong><%= f.title %></strong> &rarr; Level <%= f.level %>
 							<small>(<%= f.note %>)</small></li>
 					<% end %>
 				</ul>
-			</div>
-		<% end %>
+			<% end %>
+		</div>
 	<% end %>
 </div>
 <% end %>

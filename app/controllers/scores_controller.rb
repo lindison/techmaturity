@@ -1,15 +1,19 @@
 
 # Manages assessments (still surfaced under the "scores" routes/UI term).
-# Each saved "score" is an Assessment of a product against its framework, with
-# one response per capability.
+# A "score" run assesses a product against EVERY maturity model in one process:
+# the form spans all frameworks' dimensions, and a submit creates one Assessment
+# per framework that received answers — so an asset carries a Tech score and an
+# SRE score (and any future model) produced together, not one-at-a-time.
 class ScoresController < ApplicationController
   before_action :set_product
   before_action :set_assessment, only: [:show]
 
   # GET /products/:id/scores
   def index
-    @framework = @product.framework_or_default
-    @assessments = @product.assessments.where(framework: @framework).order(:created_at)
+    @frameworks = Framework.ordered.to_a
+    @assessments_by_framework = @frameworks.index_with do |framework|
+      @product.assessments.where(framework: framework).order(:created_at).to_a
+    end
   end
 
   # GET /products/:id/scores/:id
@@ -19,25 +23,27 @@ class ScoresController < ApplicationController
 
   # GET /products/:id/scores/new
   def new
-    @framework = @product.framework_or_default
-    @assessment = @product.assessments.new(framework: @framework)
-    prefill_from_last_assessment
+    @frameworks = Framework.ordered.to_a
+    @prefill = {} # capability_id => level (1-4)
+    prefill_from_last_assessments
     apply_repo_assessment(params[:repo]) if params[:repo].present? && CONFIGS[:enable_repo_assessment]
   end
 
   # POST /products/:id/scores
   def create
-    @framework = @product.framework_or_default
-    @assessment = @product.assessments.new(framework: @framework, comment: response_params[:comment])
-    build_responses(response_params[:responses])
+    responses = (response_params[:responses] || {}).to_h
+    @saved = save_assessments(responses, response_params[:comment])
 
-    if @product.is_assessable? && @assessment.save
-      @assessment.make_latest!
+    if @product.is_assessable? && @saved.any?
       @product.update(is_assessed: true)
-      redirect_to @product, notice: { type: 'success', message: 'Assessment was successfully saved.' }
+      models = @saved.size
+      redirect_to @product, notice: { type: 'success',
+                                      message: "Assessment saved across #{models} maturity model#{'s' unless models == 1}." }
     else
-      flash.now[:notice] = { type: 'danger', message: 'Assessment failed to save.' }
-      render :new
+      @frameworks = Framework.ordered.to_a
+      @prefill = responses.reject { |_id, v| v.blank? }.to_h { |id, v| [id.to_i, v.to_i] }
+      flash.now[:notice] = { type: 'danger', message: 'Pick at least one level, then Save.' }
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -55,44 +61,51 @@ class ScoresController < ApplicationController
     params.fetch(:score, {}).permit(:comment, responses: {})
   end
 
-  # responses is { "<capability_id>" => "<level 1-4>" }. Only capabilities
-  # belonging to this product's framework are accepted.
-  def build_responses(responses)
-    return if responses.blank?
+  # responses is { "<capability_id>" => "<level 1-4>" } spanning all frameworks.
+  # Each answered capability is routed to its own framework, and one Assessment
+  # is saved per framework that got at least one answer.
+  def save_assessments(responses, comment)
+    answered = responses.reject { |_id, value| value.blank? }
+    return [] if answered.empty?
 
-    allowed = @framework.capabilities.index_by(&:id)
-    responses.each do |capability_id, value|
-      next if value.blank?
+    capabilities = Capability.where(id: answered.keys.map(&:to_i))
+                             .includes(dimension: :framework).index_by(&:id)
+    by_framework = answered.group_by { |id, _value| capabilities[id.to_i]&.dimension&.framework }.except(nil)
 
-      capability = allowed[capability_id.to_i]
-      @assessment.assessment_responses.build(capability: capability, value: value.to_i) if capability
+    by_framework.filter_map do |framework, pairs|
+      assessment = @product.assessments.new(framework: framework, comment: comment)
+      pairs.each { |id, value| assessment.assessment_responses.build(capability: capabilities[id.to_i], value: value.to_i) }
+      next unless assessment.save
+
+      assessment.make_latest!
+      assessment
     end
   end
 
-  # "Re-Evaluate" starts from the previous assessment's answers.
-  def prefill_from_last_assessment
-    last = @product.assessments.where(framework: @framework).order(:created_at).last
-    return unless last
+  # "Re-Evaluate" starts from each framework's previous answers.
+  def prefill_from_last_assessments
+    @frameworks.each do |framework|
+      last = @product.assessments.where(framework: framework).order(:created_at).last
+      next unless last
 
-    last.assessment_responses.each do |response|
-      @assessment.assessment_responses.build(capability_id: response.capability_id, value: response.value)
+      last.assessment_responses.each { |response| @prefill[response.capability_id] = response.value }
     end
   end
 
-  # Pre-fill detected capability levels from a repository scan (slug -> level).
+  # Scan/clone the repo once per framework (each scores against its own rubric)
+  # and merge detected levels into @prefill, keyed by capability id.
   def apply_repo_assessment(location)
-    @repo_assessment = RepoAssessmentService.assess(location, framework: @framework.slug)
-    return if @repo_assessment.error
+    results = @frameworks.map { |framework| [framework, RepoAssessmentService.assess(location, framework: framework.slug)] }
+    @repo_assessments = results.reject { |_framework, result| result.error }
+    @repo_error = results.filter_map { |_framework, result| result.error }.first if @repo_assessments.empty?
+    @repo_source = @repo_assessments.first&.last&.source
 
-    by_slug = @framework.capabilities.index_by(&:slug)
-    @repo_assessment.scores.each do |slug, level|
-      capability = by_slug[slug]
-      next unless capability
-
-      response = @assessment.assessment_responses.detect { |r| r.capability_id == capability.id }
-      response ? response.value = level : @assessment.assessment_responses.build(capability: capability, value: level)
+    @repo_assessments.each do |framework, result|
+      by_slug = framework.capabilities.index_by(&:slug)
+      result.scores.each do |slug, level|
+        capability = by_slug[slug]
+        @prefill[capability.id] = level if capability
+      end
     end
-    @assessment.comment = "Auto-assessed from #{@repo_assessment.source}\n" +
-                          @repo_assessment.findings.map { |f| "#{f.title} (#{f.key.upcase}) = Level #{f.level} — #{f.note}" }.join("\n")
   end
 end

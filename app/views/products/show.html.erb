@@ -37,16 +37,20 @@
 		</div>
 	</div>
 
-	<% latest = @product.assessments.latest.first %>
+	<% latest_assessments = @product.assessments.latest.includes(:framework).sort_by { |a| a.framework.position || 0 } %>
+	<% latest = latest_assessments.first %>
+	<% overall = latest_assessments.any? ? latest_assessments.sum(&:total) / latest_assessments.size : 0 %>
 	<div class="product-link-bottom">
 		<div class="product-link">
-			<div class="product-link-title"> Current Score </div>
+			<div class="product-link-title"> Overall Score </div>
 			<div class="product-link-label">
-				<%= latest ? latest.total.round(2) : "0" %>%
+				<%= overall.round(2) %>%
 			</div>
 			<div class="product-link-button">
-				<% if latest %>
-					<%= link_to "View Current Score", product_score_path(@product, latest), :class=>"button" %>
+				<% if latest_assessments.any? %>
+					<% latest_assessments.each do |assessment| %>
+						<%= link_to "#{assessment.framework.name}: #{assessment.total.round(0)}%", product_score_path(@product, assessment), class: "button", style: "display:block; margin-bottom:4px" %>
+					<% end %>
 				<% else %>
 					<a href="#" class="button" disabled="true">View Current Score </a>
 				<% end %>

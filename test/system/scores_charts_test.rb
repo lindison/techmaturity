@@ -10,10 +10,11 @@ class ScoresChartsTest < ApplicationSystemTestCase
   test "scores index renders its three charts" do
     visit product_scores_path(@product)
 
+    # Charts are now per-framework (canvas IDs suffixed with the framework slug).
     # category/capability live in hidden tabs, so match regardless of visibility.
-    assert_selector "canvas#total-score-graph[data-chart-rendered='true']", visible: :all
-    assert_selector "canvas#category-score-graph[data-chart-rendered='true']", visible: :all
-    assert_selector "canvas#capability-score-graph[data-chart-rendered='true']", visible: :all
+    assert_selector "canvas#total-score-graph-tech[data-chart-rendered='true']", visible: :all
+    assert_selector "canvas#category-score-graph-tech[data-chart-rendered='true']", visible: :all
+    assert_selector "canvas#capability-score-graph-tech[data-chart-rendered='true']", visible: :all
   end
 
   test "score show renders its line and bar charts" do

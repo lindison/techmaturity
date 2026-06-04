@@ -1,0 +1,97 @@
+<%# One framework's score history: trend charts + score list.
+    Locals: framework, assessments (ordered oldest -> newest). %>
+<%
+	color = ['#FFD69F', '#3BA3CD', '#69C943', '#4F6D7A', '#5D5D5D']
+	label_for = ->(i) { i == assessments.size - 1 ? 'Current Score' : "Archive Score #{i + 1}" }
+	slug = framework.slug
+
+	category_labels   = framework.dimensions.order(:position).map(&:name)
+	capability_labels = framework.capabilities.map(&:name)
+
+	total_labels  = assessments.each_index.map { |i| label_for.call(i) }
+	total_data    = assessments.map(&:total)
+	total_colors  = assessments.each_index.map { |i| color[i % color.size] }
+
+	series = ->(values_method) do
+		assessments.each_with_index.map do |a, i|
+			{ type: 'line', fill: false, label: label_for.call(i), borderColor: color[i % color.size],
+			  backgroundColor: color[i % color.size], borderWidth: 2, data: a.public_send(values_method) }
+		end
+	end
+	org_line = ->(data) do
+		{ label: 'Organizational Average', type: 'line', fill: false, data: data,
+		  borderColor: '#d0006f', backgroundColor: '#d0006f', borderWidth: 1 }
+	end
+
+	category_datasets   = series.call(:dimension_values)  + [org_line.call(Assessment.org_dimension_values(framework))]
+	capability_datasets = series.call(:capability_values) + [org_line.call(Assessment.org_capability_values(framework))]
+%>
+
+<div class="page__content subheader">
+	<h2 class="pull-left"><%= framework.name %></h2>
+</div>
+
+<div class="score-sidebar">
+	<div class="score-sidebar-item">
+		<div class="score-sidebar-title"><p>Scores</p></div>
+		<ul class="score-sidebar-listing">
+			<% assessments.each_with_index do |assessment, index| %>
+				<li>
+					<%= link_to "#{label_for.call(index)} : #{assessment.created_at.strftime('%B %d %Y')}", product_score_path(@product, assessment) %>
+					<span data-tooltip-position="right" data-tooltip="<%= assessment.comment.presence || 'No comments on this score' %>">&#x24D8;</span>
+				</li>
+			<% end %>
+		</ul>
+	</div>
+</div>
+
+<div class="score-main" data-controller="score-nav" data-action="click->score-nav#select">
+	<div class="score-main-nav">
+		<div class="score-main-nav-item active total-score" data-item="total-score"><p> Score Trending </p></div>
+		<div class="score-main-nav-item category-score" data-item="category-score"><p> Category Trending </p></div>
+		<div class="score-main-nav-item capability-score" data-item="capability-score"><p> Capability Trending </p></div>
+	</div>
+
+	<div class="score-main-graph-wrapper">
+		<div class="score-main-graph total-score active">
+			<div class="score-main-title"> Total Score Graph </div>
+			<canvas id="total-score-graph-<%= slug %>"></canvas>
+		</div>
+		<div class="score-main-graph category-score">
+			<div class="score-main-title"> Category Score Graph </div>
+			<canvas id="category-score-graph-<%= slug %>"></canvas>
+		</div>
+		<div class="score-main-graph capability-score">
+			<div class="score-main-title"> Capability Score Graph </div>
+			<canvas id="capability-score-graph-<%= slug %>"></canvas>
+		</div>
+	</div>
+</div>
+
+<%= javascript_tag do %>
+	window.onChartReady(function() {
+	window.renderChart("total-score-graph-<%= slug %>", {
+		type: 'bar',
+		data: {
+			labels: <%= raw total_labels.to_json %>,
+			datasets: [{ label: "Total Maturity Score", data: <%= raw total_data.to_json %>,
+				backgroundColor: <%= raw total_colors.to_json %>, borderColor: '#000000', borderWidth: 1 }]
+		},
+		options:{ plugins: { tooltip: { enabled: false } }, scales: { y: { min: 0, max: 100, beginAtZero: true } } }
+	});
+
+	window.renderChart("category-score-graph-<%= slug %>", {
+		type: 'line',
+		data: { labels: <%= raw category_labels.to_json %>, datasets: <%= raw category_datasets.to_json %> },
+		options:{ scales: { y: { min: 0, max: 4, beginAtZero: true, ticks: { stepSize: 1 } },
+			x: { ticks: { display: true, autoSkip: false, minRotation: 90 } } } }
+	});
+
+	window.renderChart("capability-score-graph-<%= slug %>", {
+		type: 'line',
+		data: { labels: <%= raw capability_labels.to_json %>, datasets: <%= raw capability_datasets.to_json %> },
+		options:{ scales: { y: { min: 0, max: 4, beginAtZero: true, ticks: { stepSize: 1 } },
+			x: { ticks: { display: true, autoSkip: false, minRotation: 90 } } } }
+	});
+	});
+<% end %>

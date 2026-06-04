@@ -7,7 +7,7 @@ class FrameworkSelectionTest < ActionDispatch::IntegrationTest
 
     get new_product_score_path(product)
     assert_response :success
-    assert_select ".progressive-form-title", text: "SLOs & Error Budgets" # an SRE dimension
+    assert_select ".progressive-form-title strong", text: "SLOs & Error Budgets" # an SRE dimension
 
     capability = sre.capabilities.find_by(slug: "error_budget")
     assert_difference -> { product.assessments.count }, 1 do
