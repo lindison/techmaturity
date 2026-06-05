@@ -30,4 +30,17 @@ class FrameworkSeederTest < ActiveSupport::TestCase
       FrameworkSeeder.seed_tech!
     end
   end
+
+  test "re-seeding prunes capabilities no longer in the definition" do
+    framework = FrameworkSeeder.seed_tech!
+    dimension = framework.dimensions.find_by(slug: "a")
+    ghost = dimension.capabilities.create!(name: "Ghost", slug: "a_ghost", position: 99)
+    ghost.capability_levels.create!(value: 1, description: "x")
+    assert Capability.exists?(ghost.id)
+
+    FrameworkSeeder.seed_tech! # a_ghost is not in the YAML -> pruned (with its levels)
+
+    refute Capability.exists?(ghost.id)
+    refute CapabilityLevel.exists?(capability_id: ghost.id)
+  end
 end
