@@ -2,8 +2,7 @@
 // Each canvas carries its score in data-percentage. Re-runs on full Turbo
 // visits and when the products Turbo Frame is replaced by a search.
 
-// Dracula accents: red / yellow / green by score band.
-const colorFor = (pct) => (pct < 40 ? "#ff5555" : pct < 80 ? "#f1fa8c" : "#50fa7b")
+const colorFor = (pct) => (pct < 40 ? "#F00" : pct < 80 ? "#FA3" : "#19AB20")
 
 // Chart.js v4 plugin: draw the percentage in the centre of the doughnut.
 const centerTextPlugin = {
@@ -14,7 +13,7 @@ const centerTextPlugin = {
     const { ctx, chartArea: { left, right, top, bottom } } = chart
     ctx.save()
     ctx.font = "16px 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
-    ctx.fillStyle = "#f8f8f2"
+    ctx.fillStyle = "#000"
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
     ctx.fillText(text, (left + right) / 2, (top + bottom) / 2)
@@ -29,7 +28,7 @@ const drawTile = (canvas) => {
     data: {
       datasets: [{
         data: [pct, 100 - pct],
-        backgroundColor: [colorFor(pct), "#44475a"],
+        backgroundColor: [colorFor(pct), "#F6F7F9"],
         borderWidth: 0
       }]
     },

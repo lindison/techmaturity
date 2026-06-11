@@ -12,7 +12,7 @@
 		<%= link_to 'Manage data', data_path, class: 'button button--cta' if CONFIGS[:enable_data_management] %>
 	</div>
 <% else %>
-<% palette = ['#bd93f9', '#50fa7b', '#ffb86c', '#ff79c6', '#f1fa8c'] %>
+<% palette = ['#DFF3FB', '#BFE6F7', '#80CEEF', '#0097D3', '#0075A7'] %>
 <% capability_colors = @framework.dimensions.order(:position).each_with_index.flat_map { |d, i| Array.new(d.capabilities.size, palette[i % palette.size]) } %>
 
 <div class="stats">
@@ -48,9 +48,9 @@
 		<table class="table table-hover table-bordered">
 			<thead>
 				<tr>
-					<th bgcolor="#44475a" style="color: #f8f8f2">Title</th>
-					<th bgcolor="#44475a" style="color: #f8f8f2">Score</th>
-					<th bgcolor="#44475a" style="color: #f8f8f2">Current Score Description</th>
+					<th bgcolor="#D0006F" style="color: #FFF">Title</th>
+					<th bgcolor="#D0006F" style="color: #FFF">Score</th>
+					<th bgcolor="#D0006F" style="color: #FFF">Current Score Description</th>
 				</tr>
 			</thead>
 			<% @framework.capabilities.each_with_index do |capability, index| %>
@@ -73,10 +73,10 @@
 			labels: <%= raw @capability_labels.to_json %>,
 			datasets: [{
 				type: 'line', label: 'Category', data: <%= raw @org_expanded_values.to_json %>,
-				borderColor: '#6272a4', borderWidth: 1, tension: 0, pointRadius: 0
+				borderColor: '#000000', borderWidth: 1, tension: 0, pointRadius: 0
 			},{
 				type: 'bar', label: 'Capabilities', data: <%= raw @org_capability_values.to_json %>,
-				backgroundColor: <%= raw capability_colors.to_json %>, borderColor: '#6272a4', borderWidth: 1
+				backgroundColor: <%= raw capability_colors.to_json %>, borderColor: '#000000', borderWidth: 1
 			}]
 		},
 		options: {

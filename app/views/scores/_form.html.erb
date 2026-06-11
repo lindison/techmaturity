@@ -1,5 +1,4 @@
-<% palette = ['#bd93f9', '#8be9fd', '#50fa7b', '#ffb86c', '#ff79c6'] %>
-<% levelcolors = ['#2f2b3d', '#39314f', '#463a66', '#574a7e', '#6b549c'] %>
+<% palette = ['#dff3fb', '#bfe6f7', '#80ceef', '#0097d3', '#0075a7'] %>
 <%= form_with url: product_scores_path(@product), method: :post, html: { id: 'score-form' } do %>
 
 	<%# Every framework's dimensions are flattened, then grouped two-per-page so a
@@ -34,15 +33,15 @@
 						<div class="progressive-form-content">
 							<table class="table table-hover table-bordered">
 								<tr>
-									<th bgcolor="#21222c" class="progressive-form-meta">Title</th>
+									<th bgcolor="bbc3c9" class="progressive-form-meta">Title</th>
 									<% (1..4).each do |v| %>
-										<th bgcolor="<%= levelcolors[v] %>" class="progressive-form-level">Level <%= v %></th>
+										<th bgcolor="<%= palette[(v - 1) % palette.size] %>" class="progressive-form-level">Level <%= v %></th>
 									<% end %>
-									<th bgcolor="#21222c" class="progressive-form-meta">Min Score</th>
+									<th bgcolor="#fbfbf1" class="progressive-form-meta">Min Score</th>
 								</tr>
 								<% dimension.capabilities.order(:position).each do |capability| %>
 									<tr>
-										<td bgcolor="#21222c" style="border:1px solid #44475a"><%= capability.name %></td>
+										<td bgcolor="#dde1e4" style="border:1px solid #bbc3c9"><%= capability.name %></td>
 										<% (1..4).each do |v| %>
 											<td class="selectable">
 												<label for="cap_<%= capability.id %>_<%= v %>"><%= capability.level(v)&.formatted_description&.html_safe %></label>

@@ -23,8 +23,8 @@
 			data-repo-scan-status-url-value="<%= scan_status_product_scores_path(@product, id: @scan.id) %>"
 			data-repo-scan-interval-value="2500">
 			<p><strong>Assessing <code><%= @scan.repo %></code>…</strong> reading the whole repository and scoring it against every maturity model. This takes a few minutes — you can leave this page open.</p>
-			<div style="height:10px; background:#21222c; border-radius:5px; overflow:hidden">
-				<div data-repo-scan-target="bar" style="height:10px; width:<%= @scan.progress %>%; background:#bd93f9; transition:width .4s"></div>
+			<div style="height:10px; background:#e6eef2; border-radius:5px; overflow:hidden">
+				<div data-repo-scan-target="bar" style="height:10px; width:<%= @scan.progress %>%; background:#0097d3; transition:width .4s"></div>
 			</div>
 			<p style="margin-top:6px"><span data-repo-scan-target="label"><%= @scan.progress %>%</span>
 				&middot; <%= link_to 'or fill it in manually', new_product_score_path(@product) %></p>
